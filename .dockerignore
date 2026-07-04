@@ -1,0 +1,11 @@
+.git
+.github
+.venv*
+__pycache__
+*.pyc
+.pytest_cache
+backend/relay.db
+backend/relay.db-*
+backend/audit-log.jsonl
+.env
+tests

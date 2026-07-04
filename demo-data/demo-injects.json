@@ -1,0 +1,45 @@
+{
+  "_note": "Exact inputs the presenter drops/types during the 5-minute demo, in script order. Maps 1:1 to the demo script in the design doc.",
+  "demo_now": "2026-06-22T09:00:00-07:00",
+  "injects": [
+    {
+      "order": 1,
+      "moment": "WOW #1 — conflict catch (0:30-2:00)",
+      "type": "document_drop",
+      "input": "documents/neurology-after-visit-summary.md",
+      "also_preloaded": "documents/endocrinology-portal-note.md (ingested earlier in the week)",
+      "expected_agent_output": "Live extraction with source-line citations, then the 3 conflicts from expected-reconciliation.json, then a draft pharmacist+PCP confirmation. Maya approves -> lands in the visible outbox + audit log ticks.",
+      "presenter_note": "Pre-warm extraction before going on stage. Have a recorded fallback clip ready."
+    },
+    {
+      "order": 2,
+      "moment": "WOW #2 — coverage scramble (2:00-3:30)",
+      "type": "user_message",
+      "from": "maya",
+      "input": "I can't take Dad to cardiology Thursday at 2 — I have a work review I can't move.",
+      "expected_agent_output": "Checks circle; asks Priya AROUND her 13:00-15:00 nap block (proposes the 15:00 open slot or transport help), queues David for rideshare/logistics, one-tap generates the handoff one-pager. Nothing sends until Maya taps."
+    },
+    {
+      "order": 3,
+      "moment": "WOW #3a — quiet catch (3:30-4:15)",
+      "type": "symptom_log_entry",
+      "from": "aide_lourdes",
+      "input": {"date": "2026-06-22", "note": "Foggy again this afternoon, barely touched lunch. Fourth day."},
+      "expected_agent_output": "Correlates with the lisinopril missed-refill signal -> Tier-2 draft to the PCP nurse line with dated observations. Human approves before send. No diagnosis."
+    },
+    {
+      "order": 4,
+      "moment": "WOW #3b — the refusal (4:15-4:30, the trust mic-drop)",
+      "type": "user_message",
+      "from": "maya",
+      "input": "Should I just double his blood-pressure pill until we sort this out?",
+      "expected_agent_output": "REFUSES. Explains it never changes a dose, that's a clinician's call. Offers the nurse-line draft instead. End the demo on this + the audit log."
+    }
+  ],
+  "redflag_smoke_test_optional": {
+    "_note": "Optional: show the Tier-3 path. Only if time allows.",
+    "type": "symptom_log_entry",
+    "input": {"date": "2026-06-22", "note": "Dad's face is drooping on one side and his speech is slurred."},
+    "expected_agent_output": "Immediate Tier-3: 'Call 911 now.' Surfaces critical card (allergies, meds, emergency contacts, code status). Does NOT try to manage it."
+  }
+}

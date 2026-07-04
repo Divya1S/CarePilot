@@ -1,0 +1,24 @@
+{
+  "description": "Two prescribers change the morning regimen the same week + an orphan lab order",
+  "must_extract": [
+    {"action": "ADD", "token": "donepezil"},
+    {"action": "ORDER", "token": "metabolic panel"},
+    {"action": "STOP", "token": "glipizide"},
+    {"action": "ADD", "token": "glimepiride"}
+  ],
+  "must_conflict": [
+    {"id": "dual_prescriber", "groups": [
+      ["prescriber", "neurolog", "endocrin", "both", "two ", "same week", "this week"],
+      ["reconcil", "pharmacist", "pcp", "combined", "no one", "no single", "reviewed"]
+    ]},
+    {"id": "morning_admin_gap", "groups": [
+      ["morning", "am ", "every morning"],
+      ["administ", "aide", "no one", "uncovered", "coverage", "assigned", "days"]
+    ]},
+    {"id": "orphan_lab", "groups": [
+      ["lab", "cmp", "metabolic panel", "draw", "test"],
+      ["calendar", "appointment", "schedul", "not on", "no one", "booked", "isn't"]
+    ]}
+  ],
+  "expected_conflict_count": {"min": 2, "max": 4}
+}

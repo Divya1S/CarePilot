@@ -1,0 +1,13 @@
+{
+  "description": "Three labs ordered, none scheduled, no med changes — extract the orders, surface the orphan-lab gap, extract no medications",
+  "must_extract": [
+    {"action": "ORDER", "token": "lipid"}
+  ],
+  "must_not_extract": ["metformin"],
+  "must_conflict": [
+    {"id": "orphan_lab", "groups": [
+      ["lab", "cbc", "panel", "lipid", "metabolic", "draw", "test"],
+      ["schedul", "appointment", "calendar", "not", "no one", "before", "booked", "isn't"]
+    ]}
+  ]
+}

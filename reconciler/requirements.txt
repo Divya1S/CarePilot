@@ -1,0 +1,5 @@
+# Reconciler deps. Install the SDK matching your provider (see ../llm.py).
+pydantic>=2.0
+openai>=1.40          # OpenAI / Gemini / OpenRouter / Groq / Together / Ollama (OpenAI-compatible)
+# anthropic>=0.69     # only if RELAY_LLM_PROVIDER=anthropic
+pypdf>=4.0            # optional: read PDF after-visit summaries (else pass the .md)

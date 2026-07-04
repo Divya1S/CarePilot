@@ -1,0 +1,8 @@
+{
+  "description": "One evening dose change, same prescriber, pharmacy-reviewed, no lab — must surface NO conflicts",
+  "must_extract": [
+    {"token": "atorvastatin"}
+  ],
+  "must_not_extract": ["metformin", "lisinopril"],
+  "expected_conflict_count": {"min": 0, "max": 0}
+}

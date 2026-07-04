@@ -1,0 +1,16 @@
+# Relay backend. Install from the repo root:
+#   pip install -r backend/requirements.txt
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.0
+python-multipart>=0.0.9   # file uploads (live PDF ingestion)
+
+# LLM provider (provider-agnostic adapter — see ../llm.py):
+openai>=1.40          # OpenAI / Gemini / OpenRouter / Groq / Together / Ollama (OpenAI-compatible)
+# anthropic>=0.69     # only if RELAY_LLM_PROVIDER=anthropic
+
+pypdf>=4.0            # optional: read PDF after-visit summaries (else the .md twins are used)
+
+# Live Google Calendar (optional — the Scheduler falls back to mock without these):
+google-api-python-client>=2.0
+google-auth>=2.0

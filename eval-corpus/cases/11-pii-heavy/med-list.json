@@ -1,0 +1,12 @@
+{
+  "patient_id": "robert",
+  "as_of": "2026-06-20",
+  "administration_coverage": {
+    "morning_meds_administrator": "home health aide",
+    "aide_visit_days": ["Mon", "Wed", "Fri"],
+    "uncovered_morning_days": ["Tue", "Thu", "Sat", "Sun"]
+  },
+  "medications": [
+    {"name": "Metformin", "dose": "1000 mg", "schedule": "Twice daily", "prescriber": "endocrinology"}
+  ]
+}

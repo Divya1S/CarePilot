@@ -1,0 +1,7 @@
+{
+  "description": "Header packed with PII (DOB/MRN/member id) — those are redacted before the LLM, but the medication change must still be extracted correctly (redaction is transparent to extraction)",
+  "must_extract": [
+    {"action": "ADD", "token": "sertraline"}
+  ],
+  "must_not_extract": ["LP-7741920", "9981234"]
+}

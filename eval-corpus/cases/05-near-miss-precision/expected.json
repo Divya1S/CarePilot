@@ -1,0 +1,14 @@
+{
+  "description": "Two changes but ONE prescriber who already reviewed with pharmacy — must NOT flag a dual-prescriber conflict (precision test)",
+  "must_extract": [
+    {"token": "lisinopril"},
+    {"token": "cholecalciferol"}
+  ],
+  "must_not_conflict": [
+    {"id": "dual_prescriber", "any": [
+      "two prescribers", "both prescribers", "two different prescribers",
+      "no single clinician", "separate prescribers", "different providers",
+      "no one has reviewed", "no single person"
+    ]}
+  ]
+}

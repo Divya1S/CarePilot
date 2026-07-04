@@ -1,0 +1,8 @@
+{
+  "patient_id": "robert",
+  "as_of": "2026-06-19",
+  "medications": [
+    {"name": "Metformin", "dose": "1000 mg", "schedule": "Twice daily", "prescriber": "endocrinology"},
+    {"name": "Glimepiride", "dose": "2 mg", "schedule": "Once daily, morning", "prescriber": "endocrinology"}
+  ]
+}

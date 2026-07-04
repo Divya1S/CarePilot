@@ -1,0 +1,8 @@
+{
+  "patient_id": "robert",
+  "as_of": "2026-06-23",
+  "medications": [
+    {"name": "Metformin", "dose": "1000 mg", "schedule": "Twice daily", "prescriber": "endocrinology"},
+    {"name": "Lisinopril", "dose": "10 mg", "schedule": "Once daily, morning", "prescriber": "pcp"}
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "description": "A lab is ordered with no med changes — must surface the orphan lab, must NOT invent a dual-prescriber conflict",
+  "must_extract": [
+    {"action": "ORDER", "token": "a1c"}
+  ],
+  "must_conflict": [
+    {"id": "orphan_lab", "groups": [
+      ["lab", "a1c", "hemoglobin", "draw", "test"],
+      ["calendar", "appointment", "schedul", "not on", "no one", "booked", "isn't", "before"]
+    ]}
+  ],
+  "must_not_conflict": [
+    {"id": "dual_prescriber", "any": ["two prescribers", "both prescribers", "two different prescribers", "no single clinician", "separate prescribers"]}
+  ],
+  "expected_conflict_count": {"min": 1, "max": 2}
+}

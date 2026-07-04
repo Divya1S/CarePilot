@@ -1,0 +1,14 @@
+{
+  "_note": "Synthetic pharmacy feed (mocked integration). Lisinopril shows a refill due and NOT picked up — the missed-dose signal the Watcher correlates with the afternoon-confusion pattern. Do NOT assert this caused anything; it is a signal worth a clinician's eyes.",
+  "patient_id": "robert",
+  "pharmacy": "Bayview Pharmacy",
+  "as_of": "2026-06-22",
+  "prescriptions": [
+    {"med": "Lisinopril 10 mg", "last_filled": "2026-05-20", "days_supply": 30, "refill_ready_on": "2026-06-18", "status": "READY_NOT_PICKED_UP", "signal": "possible_missed_doses_since_2026-06-19"},
+    {"med": "Metformin 1000 mg", "last_filled": "2026-06-05", "days_supply": 30, "refill_ready_on": "2026-07-03", "status": "CURRENT"},
+    {"med": "Atorvastatin 20 mg", "last_filled": "2026-06-05", "days_supply": 30, "refill_ready_on": "2026-07-03", "status": "CURRENT"},
+    {"med": "Aspirin 81 mg", "last_filled": "2026-06-05", "days_supply": 90, "refill_ready_on": "2026-09-01", "status": "CURRENT"},
+    {"med": "Donepezil 5 mg", "last_filled": null, "status": "NEW_PRESCRIPTION_NOT_YET_FILLED", "note": "Ordered by neurology 2026-06-19; not yet sent to pharmacy"},
+    {"med": "Glimepiride 2 mg", "last_filled": null, "status": "NEW_PRESCRIPTION_NOT_YET_FILLED", "note": "Ordered by endocrinology 2026-06-16; not yet sent to pharmacy"}
+  ]
+}

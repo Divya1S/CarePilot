@@ -1,0 +1,6 @@
+{
+  "description": "A no-change follow-up note — the agent must extract NOTHING and surface NO conflicts (hallucination guard)",
+  "must_extract": [],
+  "must_not_extract": ["metformin", "lisinopril", "atorvastatin"],
+  "expected_conflict_count": {"min": 0, "max": 0}
+}

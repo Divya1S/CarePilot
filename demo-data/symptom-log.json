@@ -1,0 +1,11 @@
+{
+  "_note": "Synthetic observation log. The last 3 entries form the afternoon-confusion + unfinished-lunch pattern that the Watcher correlates with the missed lisinopril refill (Journey C). Earlier entries are benign baseline.",
+  "patient_id": "robert",
+  "entries": [
+    {"date": "2026-06-10", "author": "aide_lourdes", "note": "Good morning. Glucose 132. Ate full breakfast. Cheerful, oriented.", "flag": false},
+    {"date": "2026-06-13", "author": "maya", "note": "Watched the game together, did fine. Took evening meds.", "flag": false},
+    {"date": "2026-06-18", "author": "aide_lourdes", "note": "More confused than usual in the afternoon — asked twice what day it was. Only finished half his lunch.", "flag": true},
+    {"date": "2026-06-19", "author": "aide_lourdes", "note": "Afternoon disorientation again around 3pm. Didn't finish lunch. Morning was okay.", "flag": true},
+    {"date": "2026-06-20", "author": "maya", "note": "Dad seemed foggy this afternoon, left most of lunch on the plate. Third day like this.", "flag": true}
+  ]
+}

@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv*/
+.pytest_cache/
+
+# Relay runtime
+backend/relay.db
+backend/relay.db-*
+backend/audit-log.jsonl
+
+# Env / secrets
+.env

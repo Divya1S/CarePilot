@@ -1,0 +1,15 @@
+{
+  "description": "Messy hospital discharge: multiple med changes + an unscheduled follow-up — must extract all and surface a coordination gap",
+  "must_extract": [
+    {"action": "ADD", "token": "acetaminophen"},
+    {"token": "aspirin"},
+    {"action": "ADD", "token": "calcium"}
+  ],
+  "must_conflict": [
+    {"id": "coordination_gap", "groups": [
+      ["follow", "appointment", "pcp", "visit", "morning", "administ", "aide", "schedule"],
+      ["not", "no ", "isn't", "yet", "uncovered", "arrange", "booked"]
+    ]}
+  ],
+  "expected_conflict_count": {"min": 1, "max": 4}
+}

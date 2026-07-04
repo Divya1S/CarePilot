@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Relay — Caregiver Concierge</title>
+<style>
+  :root {
+    --bg: #0f1220; --panel: #1a1f33; --panel2: #232a45; --ink: #e8ecf6;
+    --muted: #93a0c0; --accent: #6ea8fe; --ok: #4ec98f; --warn: #f5b14c;
+    --danger: #ff6b6b; --line: #2c3454;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 16px 24px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: .3px; }
+  header .tag { color: var(--muted); font-size: 13px; flex: 1; min-width: 180px; }
+  header .actingas { display: flex; align-items: center; gap: 8px; }
+  select { background: var(--panel2); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 10px; font: inherit; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid;
+    grid-template-columns: 1fr 1fr; gap: 16px; }
+  .full { grid-column: 1 / -1; }
+  .panel { background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 16px; }
+  .panel h2 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase;
+    letter-spacing: .6px; color: var(--muted); }
+  button { background: var(--accent); color: #0b1020; border: 0; border-radius: 8px;
+    padding: 9px 14px; font-weight: 600; cursor: pointer; font-size: 14px; }
+  button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  a.skip { position: absolute; left: -9999px; top: 0; background: var(--accent); color: #0b1020;
+    padding: 8px 12px; border-radius: 0 0 8px 0; z-index: 10; font-weight: 600; }
+  a.skip:focus { left: 0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  a { color: var(--accent); }
+  @media (max-width: 720px) {
+    main { grid-template-columns: 1fr; }
+    header { gap: 8px; }
+  }
+  button.ok { background: var(--ok); } button.danger { background: var(--danger); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted); }
+  .badge.live { color: var(--ok); border-color: var(--ok); }
+  .badge.mock { color: var(--warn); border-color: var(--warn); }
+  .badge.role { color: var(--accent); border-color: var(--accent); text-transform: capitalize; }
+  .item { border-top: 1px solid var(--line); padding: 10px 0; }
+  .item:first-child { border-top: 0; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px;
+    border-radius: 6px; background: var(--panel2); margin-right: 6px; }
+  .quote { color: var(--muted); font-size: 13px; font-style: italic; }
+  .conflict { border-left: 3px solid var(--warn); padding-left: 10px; margin: 10px 0; }
+  .conflict .rec { color: var(--accent); font-size: 13px; }
+  textarea { width: 100%; min-height: 140px; background: var(--panel2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px; font: inherit; resize: vertical; }
+  input[type=text] { flex: 1; background: var(--panel2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px; font: inherit; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td { padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+  .muted { color: var(--muted); }
+  .reply { border-radius: 10px; padding: 12px; margin-top: 12px; border: 1px solid var(--line); }
+  .reply.emergency { border-color: var(--danger); background: #2a1620; }
+  .reply.refusal { border-color: var(--warn); background: #2a2417; }
+  .reply.denied { border-color: var(--danger); background: #2a1620; }
+  .reply.granted { border-color: var(--ok); background: #16261f; }
+  .card td:first-child { color: var(--muted); white-space: nowrap; }
+  .empty { color: var(--muted); font-size: 13px; }
+  .locked { color: var(--warn); font-size: 13px; }
+  .out { border-top: 1px solid var(--line); padding: 10px 0; font-size: 14px; }
+  .notif { background: #2a2417; border: 1px solid var(--warn); border-radius: 10px;
+    padding: 10px 14px; margin: 0 24px; color: var(--warn); font-size: 14px; }
+  .notif + .notif { margin-top: 8px; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header>
+  <h1>Relay</h1>
+  <span class="tag">Concierge agent for family caregivers · coordinates, never diagnoses</span>
+  <div class="actingas">
+    <label class="muted" for="actor">Acting as</label>
+    <select id="actor" onchange="setActor(this.value)"></select>
+    <span id="roleBadge" class="badge role"></span>
+  </div>
+</header>
+
+<div id="notifs" aria-live="polite"></div>
+<div id="srStatus" class="sr-only" role="status" aria-live="polite"></div>
+
+<main id="main">
+  <section class="panel full">
+    <div class="row" style="justify-content: space-between;">
+      <div class="row" id="controls"></div>
+      <span id="src" class="badge"></span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Consent &amp; data control</h2>
+    <div id="consent"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Access a record</h2>
+    <div class="row">
+      <button class="ghost" onclick="tryAccess('insurance')">Open insurance documents</button>
+      <button class="ghost" onclick="tryAccess('medical-documents')">Open medical documents</button>
+    </div>
+    <div class="muted" style="font-size:12px; margin-top:6px">Access is enforced by role — try this as different people.</div>
+    <div id="accessResult" aria-live="polite"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Reconciled view</h2>
+    <div id="recon"><p class="empty">No reconciliation yet.</p></div>
+  </section>
+
+  <section class="panel">
+    <h2>Pending approval · human-in-the-loop</h2>
+    <div id="approvals"><p class="empty">Nothing waiting on you.</p></div>
+  </section>
+
+  <section class="panel">
+    <h2>Coverage plan · Scheduler</h2>
+    <div id="plan"><p class="empty">No coverage plan yet.</p></div>
+  </section>
+
+  <section class="panel">
+    <h2>Risk scan · Watcher</h2>
+    <div id="watch"><p class="empty">No scan yet.</p></div>
+  </section>
+
+  <section class="panel">
+    <h2>Calendar · Scheduler</h2>
+    <div id="calendar"><p class="empty">—</p></div>
+  </section>
+
+  <section class="panel">
+    <h2>Ask Relay</h2>
+    <div class="row">
+      <input type="text" id="askInput" placeholder="Type a question…" aria-label="Ask Relay a question" />
+      <button onclick="ask()">Send</button>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <button class="ghost" onclick="quick('Should I just double his blood-pressure pill until we sort this out?')">“double his BP pill?”</button>
+      <button class="ghost" onclick="quick('Dad&#39;s face is drooping on one side and his speech is slurred.')">red-flag input</button>
+    </div>
+    <div id="askResult" aria-live="polite"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Outbox · fake send</h2>
+    <div id="outbox"><p class="empty">Nothing sent yet.</p></div>
+  </section>
+
+  <section class="panel full">
+    <h2>Audit log · append-only</h2>
+    <div id="audit"><p class="empty">Empty.</p></div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => (s ?? "").replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const say = (msg) => { $("srStatus").textContent = msg; };   // announce to screen readers
+let currentActor = "maya";
+let rosterLoaded = false;
+
+async function api(path, method = "GET", body) {
+  const opts = { method, headers: { "Content-Type": "application/json" } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(data.detail || r.statusText); e.status = r.status; throw e; }
+  return data;
+}
+
+function setActor(id) { currentActor = id; $("accessResult").innerHTML = ""; $("askResult").innerHTML = ""; say("Now acting as " + id); refresh(); }
+
+async function refresh() {
+  const s = await api(`/api/state?actor=${encodeURIComponent(currentActor)}`);
+  renderRoster(s);
+  renderNotifs(s.notifications);
+  renderControls(s);
+  renderConsent(s.consent, s);
+  renderRecon(s.reconciliation);
+  renderApprovals(s.approvals);
+  renderPlan(s.plan);
+  renderWatch(s.watch);
+  renderCalendar(s.is_admin);
+  renderOutbox(s.outbox);
+  renderAudit(s.audit);
+}
+
+async function renderCalendar(isAdmin) {
+  let data;
+  try { data = await api("/api/calendar" + qa()); }
+  catch (e) {
+    $("calendar").innerHTML = e.status === 403
+      ? '<p class="locked">🔒 Restricted for your role.</p>'
+      : '<p class="empty">Calendar unavailable.</p>';
+    return;
+  }
+  const live = data.status.startsWith("live");
+  let h = `<span class="badge ${live ? "live" : "mock"}">${esc(data.status)}</span>`;
+  if (isAdmin) h += ` <button class="ghost" style="margin-left:8px" onclick="scheduleLab()">Schedule ordered lab → calendar</button>`;
+  h += "<h2 style='margin-top:12px'>Upcoming</h2>";
+  h += data.upcoming.length
+    ? "<ul style='margin:6px 0'>" + data.upcoming.map(e => `<li>${esc(e.summary)} — <span class="muted">${esc(e.start)}</span></li>`).join("") + "</ul>"
+    : '<p class="empty">No events.</p>';
+  if (data.created.length) {
+    h += "<h2 style='margin-top:12px'>Booked by Relay</h2><ul style='margin:6px 0'>" +
+      data.created.map(e => `<li>✅ ${esc(e.summary)} — <span class="muted">${esc(e.start)}</span>` +
+        (e.link && !e.mock ? ` · <a href="${esc(e.link)}" target="_blank">open</a>` : ` <span class="badge mock">mock</span>`) +
+        "</li>").join("") + "</ul>";
+  }
+  const appts = data.upcoming.filter(e => !/aide/i.test(e.summary));
+  if (isAdmin && appts.length) {
+    h += `<h2 style="margin-top:12px">Handoff briefing · Briefer</h2>
+      <div class="row">
+        <select id="briefAppt" aria-label="Appointment to brief">${appts.map((e, i) => `<option value="${i}">${esc(e.summary)}</option>`).join("")}</select>
+        <button class="ghost" onclick="generateBriefing()">Generate briefing</button>
+      </div>
+      <div id="briefingResult" aria-live="polite"></div>`;
+  }
+  $("calendar").innerHTML = h;
+}
+
+async function generateBriefing() {
+  const i = $("briefAppt") ? $("briefAppt").value : 0;
+  const r = await api("/api/briefer" + qa() + "&appt=" + i);
+  if (!r.ok) { alert(r.reason); say(r.reason); return; }
+  const b = r.briefing;
+  let h = `<div class="reply" style="margin-top:8px"><b>${esc(b.appointment)}</b> — ${esc(b.when)}` +
+    `<div style="margin-top:6px"><b>Ask:</b><ul style="margin:4px 0">${b.questions.map(q => `<li>${esc(q)}</li>`).join("")}</ul></div>` +
+    `<div><b>Meds:</b> ${b.medications.map(esc).join(", ")}</div>` +
+    `<div><b>Allergies:</b> ${b.allergies.map(esc).join(", ") || "none on file"}</div>` +
+    `<div><b>Pharmacy:</b> ${esc(b.pharmacy)}</div>` +
+    `<div><b>Note:</b> ${esc(b.notes)}</div>` +
+    `<div><b>Bring:</b> ${b.bring.map(esc).join(", ")}</div></div>`;
+  $("briefingResult").innerHTML = h;
+  say("Briefing generated for " + b.appointment);
+}
+
+async function scheduleLab() {
+  const r = await api("/api/calendar/schedule-lab" + qa(), "POST");
+  if (r.blocked) { alert(r.reason); say(r.reason); return; }
+  if (!r.ok) { alert(r.reason); say(r.reason); return; }
+  say("Booked " + (r.event ? r.event.summary : "the lab") + " on the calendar");
+  await refresh();
+}
+
+function renderRoster(s) {
+  if (!rosterLoaded) {
+    $("actor").innerHTML = s.roster.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
+    rosterLoaded = true;
+  }
+  $("actor").value = s.actor;
+  $("roleBadge").textContent = (s.role || "").replace(/_/g, " ");
+}
+
+function renderNotifs(list) {
+  $("notifs").innerHTML = (list || []).map(n =>
+    `<div class="notif">🔔 ${esc(n.text)} <span class="muted" style="font-size:12px">(${esc(n.ts)})</span></div>`).join("");
+}
+
+function renderControls(s) {
+  if (s.is_admin) {
+    $("controls").innerHTML =
+      `<button id="ingest" onclick="ingest()">Ingest staged summary</button>
+       <button class="ghost" type="button" onclick="document.getElementById('pdf').click()">Upload PDF</button>
+       <input type="file" id="pdf" accept=".pdf,.md,.txt" class="sr-only"
+              aria-label="Upload an after-visit document (PDF, Markdown, or text)" onchange="uploadDoc()">
+       <button class="ghost" onclick="runScheduler()">Plan Thursday coverage</button>
+       <button class="ghost" onclick="runWatcher()">Run risk scan</button>
+       <button class="ghost" onclick="reset()">Reset demo</button>`;
+  } else {
+    $("controls").innerHTML = `<span class="muted">Agent actions are limited to the care coordinator. You have scoped access.</span>
+       <button class="ghost" onclick="reset()">Reset demo</button>`;
+  }
+}
+
+function renderConsent(c, s) {
+  if (!c) { $("consent").innerHTML = '<p class="empty">—</p>'; return; }
+  const status = c.revoked
+    ? '<span class="badge mock">autonomy paused</span>'
+    : '<span class="badge live">active</span>';
+  let h = `<div>Consent ${status}</div>` +
+    `<table class="card" style="margin-top:8px">` +
+    `<tr><td>Captured</td><td>${esc(c.captured_on || "—")}</td></tr>` +
+    `<tr><td>Designated proxy</td><td>${esc(c.designated_proxy || "—")}</td></tr>` +
+    `<tr><td>Revocable</td><td>${c.revocable ? "yes" : "no"}</td></tr></table>`;
+  if (s.is_admin || s.role === "data_subject") {
+    h += c.revoked
+      ? `<button class="ok" style="margin-top:10px" onclick="setConsent(false)">Restore agent autonomy</button>`
+      : `<button class="danger" style="margin-top:10px" onclick="setConsent(true)">Revoke consent (pause agent)</button>`;
+    h += `<div class="row" style="margin-top:10px">
+            <button class="ghost" onclick="downloadData()">Download my data</button>
+            <button class="ghost" onclick="eraseData()">Erase my record</button>
+          </div>
+          <div class="muted" style="font-size:12px; margin-top:6px">Data-subject rights — export everything we hold, or erase the working record.</div>`;
+  }
+  $("consent").innerHTML = h;
+}
+
+function lock(node, x) {
+  if (x && x.restricted) { node.innerHTML = `<p class="locked">🔒 Restricted for your role — ${esc(x.kind)} is visible only to authorized people.</p>`; return true; }
+  return false;
+}
+
+function renderRecon(r) {
+  const badge = $("src");
+  if (lock($("recon"), r)) { badge.textContent = ""; badge.className = "badge"; return; }
+  if (!r) { $("recon").innerHTML = '<p class="empty">No reconciliation yet.</p>'; badge.textContent = ""; badge.className = "badge"; return; }
+  const live = r.source === "live";
+  badge.textContent = live ? "live reconciler" : "mocked data";
+  badge.className = "badge " + (live ? "live" : "mock");
+  let h = "";
+  for (const it of r.extracted) {
+    h += `<div class="item"><span class="pill">${esc(it.action)}</span><b>${esc(it.name)}</b>` +
+         (it.schedule ? ` <span class="muted">${esc(it.schedule)}</span>` : "") +
+         ` <span class="muted">· ${esc(it.prescriber)}</span></div>`;
+  }
+  h += "<h2 style='margin-top:14px'>Conflicts</h2>";
+  for (const c of r.conflicts) {
+    h += `<div class="conflict"><b>[tier ${c.tier} · ${esc(c.severity)}]</b> ${esc(c.statement)}` +
+         `<div class="rec">→ ${esc(c.recommended_action)}</div></div>`;
+  }
+  if (r.warnings && r.warnings.length) {
+    h = `<div class="reply denied" style="margin-bottom:12px"><b>⛡ Possible injected instructions in this document were ignored:</b>` +
+        "<ul style='margin:6px 0 0'>" + r.warnings.map(w => `<li>${esc(w)}</li>`).join("") + "</ul></div>" + h;
+  }
+  $("recon").innerHTML = h;
+}
+
+function renderApprovals(list) {
+  const pending = (list || []).filter(a => a.status === "pending");
+  if (!pending.length) { $("approvals").innerHTML = '<p class="empty">Nothing waiting on you.</p>'; return; }
+  $("approvals").innerHTML = pending.map(a => `
+    <div class="item">
+      <div><b>${esc(a.title)}</b></div>
+      <div class="muted" style="font-size:13px">to ${esc(a.recipients.join(", "))}</div>
+      <textarea id="body-${a.id}">${esc(a.body)}</textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="ok" onclick="approve('${a.id}')">Approve &amp; send</button>
+        <button class="danger" onclick="reject('${a.id}')">Reject</button>
+        <span class="muted" style="font-size:12px">nothing sends until you tap</span>
+      </div>
+    </div>`).join("");
+}
+
+function renderPlan(p) {
+  if (lock($("plan"), p)) return;
+  if (!p) { $("plan").innerHTML = '<p class="empty">No coverage plan yet.</p>'; return; }
+  const aptSrc = p.appointment.source || "mock";
+  let h = `<div><b>${esc(p.appointment.title)}</b> · ${esc(p.appointment.when)} ` +
+          `<span class="badge ${aptSrc.startsWith("live") ? "live" : "mock"}">${esc(aptSrc)}</span></div>` +
+          `<div class="muted" style="font-size:13px">${esc(p.conflict)}</div><table style="margin-top:8px">`;
+  for (const o of p.options) {
+    h += `<tr><td><b>${esc(o.who)}</b></td><td>${esc(o.status)}<div class="muted">${esc(o.reason)}</div>` +
+         `<div style="color:var(--accent)">${esc(o.action)}</div></td></tr>`;
+  }
+  h += "</table>" + `<div style="color:var(--accent); margin-top:8px">→ ${esc(p.recommended)}</div>`;
+  if (p.briefing) h += `<details style="margin-top:10px"><summary class="muted">Handoff one-pager</summary>` +
+    `<div style="white-space:pre-wrap; font-size:13px; margin-top:6px">${esc(p.briefing)}</div></details>`;
+  $("plan").innerHTML = h;
+}
+
+function renderWatch(w) {
+  if (lock($("watch"), w)) return;
+  if (!w) { $("watch").innerHTML = '<p class="empty">No scan yet.</p>'; return; }
+  let h = `<div class="conflict"><b>[tier ${w.tier}${w.correlated ? " · correlated" : ""}]</b> ${esc(w.statement)}</div>`;
+  h += "<ul style='margin:6px 0'>" + w.signals.map(s => `<li>${esc(s)}</li>`).join("") + "</ul>";
+  h += `<div style="color:var(--accent)">→ ${esc(w.recommended_action)}</div>`;
+  h += `<div class="muted" style="font-size:12px; margin-top:6px">${esc(w.red_flag_note)}</div>`;
+  $("watch").innerHTML = h;
+}
+
+function renderOutbox(list) {
+  if (!list || !list.length) { $("outbox").innerHTML = '<p class="empty">Nothing sent yet.</p>'; return; }
+  $("outbox").innerHTML = list.map(o => `
+    <div class="out"><b>${esc(o.subject)}</b><div class="muted" style="font-size:12px">
+      to ${esc(o.to.join(", "))} · approved by ${esc(o.approved_by)} · ${esc(o.sent_at)}</div>
+      <div style="white-space:pre-wrap; margin-top:6px">${esc(o.body)}</div></div>`).join("");
+}
+
+function renderAudit(a) {
+  if (lock($("audit"), a)) return;
+  if (!a || !a.length) { $("audit").innerHTML = '<p class="empty">Empty.</p>'; return; }
+  $("audit").innerHTML = "<table>" + a.slice().reverse().map(e => `
+    <tr><td class="muted">${esc(e.ts.replace("T", " ").replace("+00:00", "Z"))}</td>
+        <td><b>${esc(e.actor)}</b></td><td>${esc(e.action)}</td>
+        <td class="muted">${esc(e.detail)}</td></tr>`).join("") + "</table>";
+}
+
+async function tryAccess(resource) {
+  try {
+    const r = await api(`/api/access/${resource}`, "POST", { actor: currentActor });
+    $("accessResult").innerHTML = `<div class="reply granted"><b>✓ Access granted</b>` +
+      `<pre style="white-space:pre-wrap; margin:6px 0 0">${esc(JSON.stringify(r.content, null, 2))}</pre></div>`;
+    say("Access granted to " + resource);
+  } catch (e) {
+    if (e.status === 403) {
+      $("accessResult").innerHTML = `<div class="reply denied"><b>⛔ Access denied</b><div style="margin-top:6px">${esc(e.message)}</div>` +
+        `<div class="muted" style="font-size:12px; margin-top:6px">Logged to the audit trail; the coordinator was notified.</div></div>`;
+      say("Access denied to " + resource);
+      refresh();
+    } else { alert(e.message); }
+  }
+}
+
+async function setConsent(revoked) { await api("/api/consent", "POST", { revoked, actor: currentActor }); await refresh(); }
+
+async function downloadData() {
+  const r = await fetch("/api/data/export" + qa());
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) { alert(data.detail || "Export failed"); return; }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "relay-data-export.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  await refresh();
+}
+
+async function eraseData() {
+  if (!confirm("Erase the care recipient's working record? The audit trail is kept. This cannot be undone.")) return;
+  const r = await api("/api/data/erase", "POST", { actor: currentActor });
+  alert(`Erased: ${r.approvals || 0} approval(s), ${r.outbox || 0} sent message(s); reconciliation/plan/watch cleared.`);
+  await refresh();
+}
+
+const qa = () => `?actor=${encodeURIComponent(currentActor)}`;
+async function ingest() { const b = $("ingest"); b.disabled = true; b.textContent = "Reconciling…"; say("Reconciling…");
+  try { const r = await api("/api/reconcile" + qa(), "POST"); if (r.blocked) { alert(r.reason); say(r.reason); } else say("Reconciliation complete"); await refresh(); }
+  catch (e) { alert(e.message); say("Error: " + e.message); }
+  finally { const x = $("ingest"); if (x) { x.disabled = false; x.textContent = "Ingest staged summary"; } } }
+
+async function uploadDoc() {
+  const inp = $("pdf");
+  if (!inp.files.length) return;
+  const fd = new FormData();
+  fd.append("files", inp.files[0]);
+  say("Uploading and reconciling document…");
+  try {
+    const r = await fetch("/api/reconcile/upload" + qa(), { method: "POST", body: fd });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) { alert(data.detail || "Upload failed"); say("Upload failed"); return; }
+    if (data.blocked) { alert(data.reason); say(data.reason); } else say("Document reconciled");
+    await refresh();
+  } catch (e) { alert(e.message); say("Error: " + e.message); }
+  finally { inp.value = ""; }
+}
+
+async function runScheduler() { const r = await api("/api/scheduler/cover" + qa(), "POST"); if (r.blocked) { alert(r.reason); say(r.reason); } else say("Coverage plan ready"); await refresh(); }
+async function runWatcher() { const r = await api("/api/watcher/scan" + qa(), "POST"); if (r.blocked) { alert(r.reason); say(r.reason); } else say("Risk scan complete"); await refresh(); }
+async function approve(id) { await api(`/api/approvals/${id}/approve`, "POST", { actor: currentActor, edited_text: $("body-" + id).value }); await refresh(); }
+async function reject(id) { await api(`/api/approvals/${id}/reject`, "POST", { actor: currentActor }); await refresh(); }
+async function reset() { await api("/api/reset", "POST"); $("askResult").innerHTML = ""; $("accessResult").innerHTML = ""; await refresh(); }
+
+function quick(t) { $("askInput").value = t; ask(); }
+async function ask() {
+  const text = $("askInput").value.trim(); if (!text) return;
+  const r = await api("/api/ask", "POST", { actor: currentActor, text });
+  let h = `<div class="reply ${r.kind}"><b>${r.kind === "emergency" ? "⚠ EMERGENCY" : r.kind === "refusal" ? "Relay declines" : "Relay"}</b><div style="margin-top:6px">${esc(r.message)}</div>`;
+  if (r.card) {
+    h += '<table class="card" style="margin-top:10px">' +
+      `<tr><td>Patient</td><td>${esc(r.card.name)}</td></tr>` +
+      `<tr><td>Allergies</td><td>${esc(r.card.allergies.join(", "))}</td></tr>` +
+      `<tr><td>Medications</td><td>${esc(r.card.current_medications.join(", "))}</td></tr>` +
+      `<tr><td>Emergency contacts</td><td>${esc(r.card.emergency_contacts.join(", "))}</td></tr>` +
+      `<tr><td>Code status</td><td>${esc(r.card.code_status)}</td></tr>` +
+      `<tr><td>Pharmacy</td><td>${esc(r.card.pharmacy)}</td></tr></table>`;
+  }
+  h += "</div>";
+  $("askResult").innerHTML = h;
+  await refresh();
+}
+
+refresh();
+
+// Poll so background (proactive) findings surface without a click. Skip while the
+// user is editing a draft so we never clobber unsaved text.
+setInterval(() => {
+  if (document.activeElement && document.activeElement.tagName === "TEXTAREA") return;
+  refresh();
+}, 30000);
+</script>
+</body>
+</html>

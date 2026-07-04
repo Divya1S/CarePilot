@@ -1,0 +1,77 @@
+{
+  "_note": "Synthetic. No real people or health data.",
+  "demo_now": "2026-06-22T09:00:00-07:00",
+  "care_recipient": {
+    "id": "robert",
+    "name": "Robert Chen",
+    "age": 72,
+    "timezone": "America/Los_Angeles",
+    "role": "data_subject",
+    "consent": {
+      "captured_on": "2026-02-10",
+      "captured_while_capacity": true,
+      "designated_proxy": "maya",
+      "revocable": true
+    },
+    "conditions": ["Early-stage vascular dementia", "Type 2 diabetes", "Hypertension"],
+    "allergies": ["Penicillin"],
+    "emergency_contacts": ["maya", "priya"],
+    "critical_card": {
+      "code_status": "Full code (on file)",
+      "primary_pharmacy": "Bayview Pharmacy",
+      "preferences": "Gets anxious in waiting rooms; prefers morning appointments"
+    }
+  },
+  "care_circle": [
+    {
+      "id": "maya",
+      "name": "Maya Chen",
+      "age": 41,
+      "relationship": "Daughter",
+      "role": "coordinator_admin",
+      "timezone": "America/Los_Angeles",
+      "context": "Marketing manager, hybrid full-time. Two kids (8, 11). Primary caregiver.",
+      "access": "full_record"
+    },
+    {
+      "id": "priya",
+      "name": "Priya Chen",
+      "age": 36,
+      "relationship": "Daughter",
+      "role": "secondary_caregiver",
+      "timezone": "America/Los_Angeles",
+      "context": "Local. Newborn at home; available only in narrow windows.",
+      "access": ["schedule", "assigned_tasks", "general_status"],
+      "constraints": ["Newborn nap window 13:00-15:00 daily — do not schedule"]
+    },
+    {
+      "id": "david",
+      "name": "David Chen",
+      "age": 44,
+      "relationship": "Son",
+      "role": "secondary_caregiver",
+      "timezone": "America/Chicago",
+      "context": "3 states away. Can handle logistics, rideshare booking, bills — not physical care.",
+      "access": ["schedule", "assigned_tasks", "general_status"]
+    },
+    {
+      "id": "aide_lourdes",
+      "name": "Lourdes M. (Home Health Aide)",
+      "relationship": "Professional",
+      "role": "professional_task_scoped",
+      "timezone": "America/Los_Angeles",
+      "context": "Visits Mon/Wed/Fri 08:00-10:00. Administers AM insulin + glucose check; logs observations.",
+      "access": ["assigned_care_plan_items"],
+      "access_timebox": "visit_windows_only"
+    }
+  ],
+  "rbac_matrix": {
+    "medical_documents": ["maya"],
+    "insurance_financial": ["maya"],
+    "med_list_view": ["maya", "priya", "david", "aide_lourdes"],
+    "med_list_edit": ["maya"],
+    "calendar_view": ["maya", "priya", "david"],
+    "symptom_log_write": ["maya", "aide_lourdes"],
+    "audit_log_view": ["maya", "robert"]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "_note": "Synthetic calendars. Engineered so Thursday 6/25 2pm cardiology collides with Maya's work review, Priya's nap window blocks the same slot, and the ordered CMP lab appears NOWHERE.",
+  "demo_now": "2026-06-22T09:00:00-07:00",
+  "calendars": {
+    "robert": [
+      {"title": "Aide visit (insulin + glucose)", "start": "2026-06-22T08:00:00-07:00", "end": "2026-06-22T10:00:00-07:00", "recurs": "Mon/Wed/Fri", "owner": "aide_lourdes"},
+      {"title": "Cardiology — Dr. Banerjee", "start": "2026-06-25T14:00:00-07:00", "end": "2026-06-25T15:00:00-07:00", "location": "Bayview Cardiology, Suite 210", "needs_transport": true},
+      {"title": "Neurology follow-up — Dr. Okafor", "start": "2026-07-10T10:00:00-07:00", "end": "2026-07-10T11:00:00-07:00"}
+    ],
+    "maya": [
+      {"title": "School pickup", "start": "2026-06-25T15:30:00-07:00", "end": "2026-06-25T16:00:00-07:00"},
+      {"title": "Q3 Campaign Review (work, cannot move)", "start": "2026-06-25T13:00:00-07:00", "end": "2026-06-25T15:00:00-07:00", "hard_conflict": true}
+    ],
+    "priya": [
+      {"title": "Newborn nap window — DO NOT SCHEDULE", "start": "2026-06-25T13:00:00-07:00", "end": "2026-06-25T15:00:00-07:00", "recurs": "daily", "constraint": true},
+      {"title": "Open / available", "start": "2026-06-25T15:00:00-07:00", "end": "2026-06-25T17:30:00-07:00"}
+    ],
+    "david": [
+      {"title": "Remote — available for logistics/calls", "start": "2026-06-25T09:00:00-05:00", "end": "2026-06-25T17:00:00-05:00", "note": "Central time; cannot provide in-person transport"}
+    ]
+  },
+  "lab_appointment_for_ordered_cmp": null
+}

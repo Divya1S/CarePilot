@@ -1,0 +1,33 @@
+# Render Blueprint — turnkey deploy.
+#   1. Push this repo to GitHub.
+#   2. Render Dashboard → New → Blueprint → pick the repo.
+#   3. Set the two secret env vars (RELAY_ACCESS_PASSWORD, RELAY_LLM_API_KEY).
+# (Any Docker host works too — this file is just Render's convenience format.)
+services:
+  - type: web
+    name: relay
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: RELAY_ACCESS_PASSWORD   # REQUIRED — the shared-password gate
+        sync: false                   # set a strong value in the dashboard
+      - key: RELAY_LLM_API_KEY        # your Gemini/OpenAI key (blank ⇒ offline mock)
+        sync: false
+      - key: RELAY_LLM_PROVIDER
+        value: openai
+      - key: RELAY_LLM_MODEL
+        value: gemini-2.5-flash
+      - key: RELAY_LLM_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai/
+      - key: RELAY_WATCH_INTERVAL
+        value: "120"
+      - key: RELAY_DB
+        value: /data/relay.db
+    # Free tier state is ephemeral (resets on restart). For persistence, move to a
+    # paid instance and uncomment a disk:
+    # disk:
+    #   name: relay-data
+    #   mountPath: /data
+    #   sizeGB: 1

@@ -1,0 +1,17 @@
+{
+  "description": "Three actions from ONE prescriber (increase + discontinue + order an imaging test) — extract all, no dual-prescriber flag",
+  "must_extract": [
+    {"token": "metoprolol"},
+    {"action": "STOP", "token": "furosemide"},
+    {"action": "ORDER", "token": "echocardiogram"}
+  ],
+  "must_conflict": [
+    {"id": "orphan_test", "groups": [
+      ["echo", "echocardiogram", "test", "imaging"],
+      ["schedul", "appointment", "calendar", "not", "no one", "before", "booked", "isn't"]
+    ]}
+  ],
+  "must_not_conflict": [
+    {"id": "dual_prescriber", "any": ["two prescribers", "both prescribers", "no single clinician", "separate prescribers"]}
+  ]
+}

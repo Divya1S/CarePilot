@@ -1,0 +1,53 @@
+{
+  "_note": "Synthetic canonical med list. State BEFORE the new docs are ingested. This is the source-of-truth the Reconciler diffs against.",
+  "patient_id": "robert",
+  "as_of": "2026-06-15",
+  "administration_coverage": {
+    "morning_meds_administrator": "aide_lourdes",
+    "aide_visit_days": ["Mon", "Wed", "Fri"],
+    "aide_visit_window": "08:00-10:00",
+    "uncovered_morning_days": ["Tue", "Thu", "Sat", "Sun"]
+  },
+  "medications": [
+    {
+      "id": "metformin",
+      "name": "Metformin",
+      "dose": "1000 mg",
+      "schedule": "Twice daily (morning + evening)",
+      "indication": "Type 2 diabetes",
+      "prescriber": "endocrinology"
+    },
+    {
+      "id": "glipizide",
+      "name": "Glipizide",
+      "dose": "5 mg",
+      "schedule": "Once daily, morning",
+      "indication": "Type 2 diabetes",
+      "prescriber": "endocrinology"
+    },
+    {
+      "id": "lisinopril",
+      "name": "Lisinopril",
+      "dose": "10 mg",
+      "schedule": "Once daily, morning",
+      "indication": "Hypertension",
+      "prescriber": "pcp"
+    },
+    {
+      "id": "atorvastatin",
+      "name": "Atorvastatin",
+      "dose": "20 mg",
+      "schedule": "Once daily, evening",
+      "indication": "Cholesterol",
+      "prescriber": "cardiology"
+    },
+    {
+      "id": "aspirin",
+      "name": "Aspirin (low-dose)",
+      "dose": "81 mg",
+      "schedule": "Once daily, morning",
+      "indication": "Cardiovascular prevention",
+      "prescriber": "cardiology"
+    }
+  ]
+}

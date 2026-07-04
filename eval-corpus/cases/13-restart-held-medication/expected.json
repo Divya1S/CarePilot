@@ -1,0 +1,9 @@
+{
+  "description": "A previously-held medication is resumed (an add that is not on the current list) — extract the restart as a new morning med",
+  "must_extract": [
+    {"token": "aspirin"}
+  ],
+  "must_not_conflict": [
+    {"id": "dual_prescriber", "any": ["two prescribers", "both prescribers", "no single clinician", "separate prescribers"]}
+  ]
+}

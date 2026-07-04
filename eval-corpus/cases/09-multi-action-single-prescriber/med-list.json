@@ -1,0 +1,9 @@
+{
+  "patient_id": "robert",
+  "as_of": "2026-06-25",
+  "medications": [
+    {"name": "Metoprolol", "dose": "25 mg", "schedule": "Twice daily", "prescriber": "cardiology"},
+    {"name": "Furosemide", "dose": "40 mg", "schedule": "Once daily, morning", "prescriber": "cardiology"},
+    {"name": "Aspirin", "dose": "81 mg", "schedule": "Once daily, morning", "prescriber": "cardiology"}
+  ]
+}

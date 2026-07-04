@@ -1,0 +1,6 @@
+{
+  "description": "An allergy/reaction is noted but NO medication is changed — must extract nothing, surface nothing, and make no clinical claim about the allergy",
+  "must_extract": [],
+  "must_not_extract": ["sulfa", "metformin", "lisinopril"],
+  "expected_conflict_count": {"min": 0, "max": 0}
+}
