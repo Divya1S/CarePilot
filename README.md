@@ -12,7 +12,7 @@ of whom share data or talk to each other in real time. CarePilot sits with the u
 family caregiver and does the coordination work: reconciling, catching conflicts,
 drafting the messages, booking what was missed — and is radically careful with data.
 
-## What it does — six agents under one Concierge
+## What it does: six agents under one Concierge
 
 | Agent | Journey | What it does |
 |---|---|---|
