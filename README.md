@@ -2,7 +2,7 @@
 
 > CarePilot is a personal AI chief-of-staff for family caregivers that reconciles every
 > appointment, medication, and message across the whole care circle, catching the
-> conflicts and dropped handoffs that cause real harm — while never touching a
+> conflicts and dropped handoffs that cause real harm, while never touching a
 > diagnosis or a dose.
 
 **63 million Americans are family caregivers.** 55% now perform complex medical/nursing
