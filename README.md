@@ -10,7 +10,7 @@ tasks that used to happen in a clinic, but only 22% were ever trained for them. 
 typical care recipient sees multiple specialists, a pharmacy, and home health — none
 of whom share data or talk to each other in real time. CarePilot sits with the unpaid
 family caregiver and does the coordination work: reconciling, catching conflicts,
-drafting the messages, booking what was missed — and is radically careful with data.
+drafting the messages, booking what was missed and is radically careful with data.
 
 ## What it does: six agents under one Concierge
 
