@@ -90,7 +90,7 @@ Phases 1–3 of the build are complete: persistence, live PDF upload, CI, RBAC/c
 injection + PII hardening, data rights, a security review, the eval corpus + judge,
 read/write Google Calendar, a proactive Watcher, and the Briefer agent.
 
-Known limits (stated plainly): **no per-user authentication** — the deployed instance is
+Known limits (stated plainly): **no per-user authentication** the deployed instance is
 protected by a single shared password (`RELAY_ACCESS_PASSWORD`), and the role switcher is
 the identity by design; detection (injection/PII) is heuristic backing the structural
 defenses; the caregivers' per-person availability is a seeded model; synthetic data only.
