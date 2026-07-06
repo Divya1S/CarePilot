@@ -54,9 +54,9 @@ gate, the proactive-Watcher cadence). Provider details: [llm.py](llm.py).
   questions → recommend a clinician → 911 for red flags).
 - **RBAC + revocable consent**, enforced (default-deny); the data subject can **export or
   erase** their record.
-- **Untrusted documents are data, not instructions** — prompt-injection hardening + a
+- **Untrusted documents are data, not instructions** prompt-injection hardening + a
   drafter exfiltration block.
-- **PII minimization** — patient identifiers are redacted *before* any text reaches the
+- **PII minimization** patient identifiers are redacted *before* any text reaches the
   LLM (proven by tests that capture the actual prompt sent).
 - **Human-in-the-loop** on every send; **append-only audit log** of every action + access.
 
