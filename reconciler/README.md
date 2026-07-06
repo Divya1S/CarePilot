@@ -1,4 +1,4 @@
-# Relay · Reconciler
+# Intensive Vibe Coding Capstone Project: CarePilot · Reconciler
 
 The **riskiest component, built first** — per the design doc, this is the one piece
 that can't degrade gracefully. It turns messy after-visit documents (PDF) + a
@@ -78,7 +78,7 @@ result = reconcile([Path("avs.pdf")], Path("med-list.json"))
 
 ## Wiring into the full architecture
 
-This is the **Reconciler** sub-agent from [the design doc](../Relay-Caregiver-Concierge-Design.md) §3.
+This is the **Reconciler** sub-agent from the CarePilot architecture.
 The orchestrator calls `reconcile(...)`, shows `result` for approval (the mandatory
 human-in-the-loop checkpoint), and only then hands the conflicts to the
 Comms-drafter. Keep this component's eval green before building anything else.

@@ -1,8 +1,7 @@
-# Relay · Orchestrator + Approval UI
+# Intensive Vibe Coding Capstone Project: CarePilot · Orchestrator + Approval UI
 
 The **Concierge orchestrator** and the **human-in-the-loop approval surface** that
-wrap the [Reconciler](../reconciler/). This is design doc §3 (orchestration), §4
-(audit log), and §5 (safety guardrails) made runnable.
+wrap the [Reconciler](../reconciler/), implementing orchestration, the audit log, and safety guardrails.
 
 ## What it does
 
@@ -11,7 +10,7 @@ wrap the [Reconciler](../reconciler/). This is design doc §3 (orchestration), �
    approval**. Nothing is sent.
 2. **Approve / Reject** → the *mandatory* human checkpoint. Approve moves the
    (optionally edited) message to the visible **outbox** and ticks the **audit log**.
-3. **Ask Relay** → routes free text through the safety guardrails:
+3. **Ask CarePilot** → routes free text through the safety guardrails:
    - red-flag input → **Tier-3 emergency** card ("call 911"),
    - a dose-change request → **refusal** + an offer to draft a nurse-line message,
    - anything else → a plain coordinating reply.

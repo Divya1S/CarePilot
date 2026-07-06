@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Relay — Caregiver Concierge</title>
+<title>Intensive Vibe Coding Capstone Project: CarePilot — Caregiver Concierge</title>
 <style>
   :root {
     --bg: #0f1220; --panel: #1a1f33; --panel2: #232a45; --ink: #e8ecf6;
@@ -80,7 +80,7 @@
 <body>
 <a class="skip" href="#main">Skip to main content</a>
 <header>
-  <h1>Relay</h1>
+  <h1>Intensive Vibe Coding Capstone Project: CarePilot</h1>
   <span class="tag">Concierge agent for family caregivers · coordinates, never diagnoses</span>
   <div class="actingas">
     <label class="muted" for="actor">Acting as</label>
@@ -141,9 +141,9 @@
   </section>
 
   <section class="panel">
-    <h2>Ask Relay</h2>
+    <h2>Ask CarePilot</h2>
     <div class="row">
-      <input type="text" id="askInput" placeholder="Type a question…" aria-label="Ask Relay a question" />
+      <input type="text" id="askInput" placeholder="Type a question…" aria-label="Ask CarePilot a question" />
       <button onclick="ask()">Send</button>
     </div>
     <div class="row" style="margin-top:8px;">
@@ -214,7 +214,7 @@ async function renderCalendar(isAdmin) {
     ? "<ul style='margin:6px 0'>" + data.upcoming.map(e => `<li>${esc(e.summary)} — <span class="muted">${esc(e.start)}</span></li>`).join("") + "</ul>"
     : '<p class="empty">No events.</p>';
   if (data.created.length) {
-    h += "<h2 style='margin-top:12px'>Booked by Relay</h2><ul style='margin:6px 0'>" +
+    h += "<h2 style='margin-top:12px'>Booked by CarePilot</h2><ul style='margin:6px 0'>" +
       data.created.map(e => `<li>✅ ${esc(e.summary)} — <span class="muted">${esc(e.start)}</span>` +
         (e.link && !e.mock ? ` · <a href="${esc(e.link)}" target="_blank">open</a>` : ` <span class="badge mock">mock</span>`) +
         "</li>").join("") + "</ul>";
@@ -423,7 +423,7 @@ async function downloadData() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "relay-data-export.json";
+  a.download = "carepilot-data-export.json";
   a.click();
   URL.revokeObjectURL(a.href);
   await refresh();
@@ -468,7 +468,7 @@ function quick(t) { $("askInput").value = t; ask(); }
 async function ask() {
   const text = $("askInput").value.trim(); if (!text) return;
   const r = await api("/api/ask", "POST", { actor: currentActor, text });
-  let h = `<div class="reply ${r.kind}"><b>${r.kind === "emergency" ? "⚠ EMERGENCY" : r.kind === "refusal" ? "Relay declines" : "Relay"}</b><div style="margin-top:6px">${esc(r.message)}</div>`;
+  let h = `<div class="reply ${r.kind}"><b>${r.kind === "emergency" ? "⚠ EMERGENCY" : r.kind === "refusal" ? "CarePilot declines" : "CarePilot"}</b><div style="margin-top:6px">${esc(r.message)}</div>`;
   if (r.card) {
     h += '<table class="card" style="margin-top:10px">' +
       `<tr><td>Patient</td><td>${esc(r.card.name)}</td></tr>` +

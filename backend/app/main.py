@@ -58,7 +58,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Relay — Caregiver Concierge", lifespan=lifespan)
+app = FastAPI(title="Intensive Vibe Coding Capstone Project: CarePilot — Caregiver Concierge", lifespan=lifespan)
 
 
 @app.middleware("http")
@@ -84,7 +84,7 @@ async def _access_gate(request, call_next):
             return Response(
                 "Authentication required.",
                 status_code=401,
-                headers={"WWW-Authenticate": 'Basic realm="Relay"'},
+                headers={"WWW-Authenticate": 'Basic realm="CarePilot"'},
             )
     return await call_next(request)
 

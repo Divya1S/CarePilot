@@ -203,7 +203,7 @@ def run_proactive_scan(actor: str = "watcher") -> dict:
     )
     store.notify(
         "maya",
-        "Relay proactively flagged a pattern worth a clinician's eyes — a Tier-2 "
+        "CarePilot proactively flagged a pattern worth a clinician's eyes — a Tier-2 "
         "nurse-line draft is queued for your review.",
     )
     store.set_last_proactive_key(key)

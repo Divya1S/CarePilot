@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Relay — launch the backend wired to Google Gemini (OpenAI-compatible endpoint).
+# Intensive Vibe Coding Capstone Project: Relay — launch the backend wired to Google Gemini (OpenAI-compatible endpoint).
 #
 # 1) Get a key:  https://aistudio.google.com/apikey
 # 2) Put it in your shell (NOT in this file):

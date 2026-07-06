@@ -11,3 +11,7 @@ backend/audit-log.jsonl
 
 # Env / secrets
 .env
+
+# OS-specific
+.DS_Store
+Thumbs.db

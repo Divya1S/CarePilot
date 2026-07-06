@@ -1,6 +1,6 @@
-# Relay — Synthetic Demo Dataset
+# Intensive Vibe Coding Capstone Project: CarePilot — Synthetic Demo Dataset
 
-**All data here is fictional. No real health data.** Built to drive the three journeys and the 5-minute demo in [`../Relay-Caregiver-Concierge-Design.md`](../Relay-Caregiver-Concierge-Design.md).
+**All data here is fictional. No real health data.** Built to drive the three journeys and the CarePilot 5-minute demo.
 
 **Demo "now" =** `2026-06-22 09:00 America/Los_Angeles` (a Monday). Every date below is relative to that anchor — keep it fixed so the planted conflicts stay live.
 

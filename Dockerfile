@@ -1,4 +1,4 @@
-# Relay — Caregiver Concierge
+# Intensive Vibe Coding Capstone Project: Relay — Caregiver Concierge
 FROM python:3.12-slim
 
 WORKDIR /app

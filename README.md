@@ -1,6 +1,6 @@
-# Relay — a concierge agent for family caregivers
+# Intensive Vibe Coding Capstone Project: CarePilot — a concierge agent for family caregivers
 
-> Relay is a personal AI chief-of-staff for family caregivers that reconciles every
+> CarePilot is a personal AI chief-of-staff for family caregivers that reconciles every
 > appointment, medication, and message across the whole care circle — catching the
 > conflicts and dropped handoffs that cause real harm — while never touching a
 > diagnosis or a dose.
@@ -8,7 +8,7 @@
 **63 million Americans are family caregivers.** 55% now perform complex medical/nursing
 tasks that used to happen in a clinic, but only 22% were ever trained for them. A
 typical care recipient sees multiple specialists, a pharmacy, and home health — none
-of whom share data or talk to each other in real time. Relay sits with the unpaid
+of whom share data or talk to each other in real time. CarePilot sits with the unpaid
 family caregiver and does the coordination work: reconciling, catching conflicts,
 drafting the messages, booking what was missed — and is radically careful with data.
 
@@ -77,7 +77,6 @@ Plus two **live** evals (run with a key): a 13-case Reconciler reliability corpu
 
 | Path | What |
 |---|---|
-| [Relay-Caregiver-Concierge-Design.md](Relay-Caregiver-Concierge-Design.md) | The full product/agent design doc |
 | [reconciler/](reconciler/) | The Reconciler + safety/injection/redaction + eval corpus |
 | [backend/](backend/) | Orchestrator, sub-agents, RBAC, persistence, API ([backend/README.md](backend/README.md)) |
 | [web/index.html](web/index.html) | The single-file UI |
