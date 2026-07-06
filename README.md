@@ -1,7 +1,7 @@
-# Intensive Vibe Coding Capstone Project: CarePilot — a concierge agent for family caregivers
+# Intensive Vibe Coding Capstone Project: CarePilot: a concierge agent for family caregivers
 
 > CarePilot is a personal AI chief-of-staff for family caregivers that reconciles every
-> appointment, medication, and message across the whole care circle — catching the
+> appointment, medication, and message across the whole care circle, catching the
 > conflicts and dropped handoffs that cause real harm — while never touching a
 > diagnosis or a dose.
 
