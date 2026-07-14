@@ -3,6 +3,22 @@
 The **Concierge orchestrator** and the **human-in-the-loop approval surface** that
 wrap the [Reconciler](../reconciler/), implementing orchestration, the audit log, and safety guardrails.
 
+## The agent core
+
+`POST /api/agent` takes a free-text job ("Dad saw the neurologist — handle the
+paperwork") and runs a **ReAct-style planning loop** ([app/planner.py](app/planner.py)):
+the LLM picks one tool per step from a typed registry
+([app/agent_tools.py](app/agent_tools.py)), reads the compact observation, and
+re-plans until it finishes — returning the **full plan trace** (thought → action →
+observation), which the UI renders and the audit log records.
+
+Safety holds **by construction**, not by planner behavior: every registered tool
+either reads state or queues a draft for human approval (no tool sends, prescribes,
+or bypasses a gate), guardrails screen emergencies/dose-questions *before* planning,
+consent-revoked blocks the planner, and a step cap + exact-repeat guard bound the
+loop. Without an LLM key, a clearly-labeled deterministic keyword router keeps the
+surface demoable.
+
 ## What it does
 
 1. **Ingest** → the orchestrator runs the Reconciler, logs it, then the
@@ -56,6 +72,7 @@ uvicorn backend.app.main:app --reload
 
 | Method | Path | Purpose |
 |---|---|---|
+| POST | `/api/agent` | `{actor, text}` → **the agent**: guardrails screen → LLM planner selects tools step-by-step → returns the full plan trace + summary. Offline: deterministic keyword routing, labeled `fallback` |
 | GET | `/api/state?actor=ID` | **role-filtered** state (reconciliation/plan/watch/approvals/outbox/audit) + roster + consent + notifications |
 | POST | `/api/reconcile` | Reconciler on the staged demo → draft → queue approval |
 | POST | `/api/reconcile/upload` | **upload a real PDF/MD/TXT** → live Reconciler → draft → queue (needs an LLM key) |
@@ -93,7 +110,9 @@ pip install -r backend/requirements.txt -r requirements-dev.txt
 pytest        # from the repo root
 ```
 
-91 tests covering: the access gate + /health, source-quote-safe scanning, dose-change refusal / red-flag
+102 tests covering: **the planner loop** (scripted multi-step plans, unknown-tool
+recovery, repeat guard, step cap, guardrail screening, consent block, offline
+fallback), the access gate + /health, source-quote-safe scanning, dose-change refusal / red-flag
 escalation, role-filtered state (incl. briefing redaction for calendar-only
 roles), the deny→log→notify path, admin-gated agent actions, consent
 pause/restore, reconcile→approve→outbox→audit, the upload endpoint's

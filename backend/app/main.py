@@ -24,7 +24,7 @@ import llm
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 
-from . import audit, care_context, gcal, orchestrator, permissions
+from . import audit, care_context, gcal, guardrails, orchestrator, permissions, planner
 from .models import ActorRequest, ApproveRequest, AskRequest, ConsentRequest, RejectRequest
 from .store import store
 
@@ -218,6 +218,28 @@ def post_schedule_lab(actor: str = "maya") -> dict:
 def get_briefing(actor: str = "maya", appt: int = 0) -> dict:
     _require_admin(actor)  # briefings contain medical detail (meds/allergies)
     return orchestrator.generate_briefing(appt, actor)
+
+
+@app.post("/api/agent")
+def post_agent(req: AskRequest) -> dict:
+    """The agent entry point: free-text request → guardrails → planner → tools.
+
+    Guardrails screen BEFORE planning: an emergency or a dose-change request is
+    answered by the safety lane and never reaches the planner. Consent-revoked
+    pauses the agent entirely. Everything the planner does either reads state or
+    queues a draft for human approval.
+    """
+    _require_admin(req.actor)
+    screened = guardrails.route(req.text)
+    if screened["kind"] != "info":
+        audit.log(req.actor, f"agent_request ({screened['kind']})", detail=req.text)
+        return {"handled_by": "guardrails", **screened}
+    if store.consent_revoked:
+        audit.log("agent", "blocked_by_consent", detail="agent request while consent revoked")
+        return {"handled_by": "consent", "blocked": True,
+                "reason": "Agent autonomy is paused — the care recipient's consent is revoked."}
+    audit.log(req.actor, "agent_request", detail=req.text)
+    return {"handled_by": "planner", **planner.run(req.text, req.actor)}
 
 
 @app.post("/api/access/{resource}")

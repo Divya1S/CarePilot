@@ -100,6 +100,20 @@
     </div>
   </section>
 
+  <section class="panel full">
+    <h2>Agent · give it a job</h2>
+    <div class="row">
+      <input type="text" id="agentInput" aria-label="Give the agent a job"
+             placeholder="e.g. Dad saw the neurologist today — handle the paperwork" />
+      <button onclick="runAgent()">Run agent</button>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <button class="ghost" onclick="agentQuick('Dad just got back from the neurologist — deal with the paperwork and make sure nothing was missed.')">“handle the paperwork”</button>
+      <button class="ghost" onclick="agentQuick('I can&#39;t take Dad to his appointment Thursday — sort out coverage and prep whoever goes.')">“sort out Thursday”</button>
+    </div>
+    <div id="agentResult" aria-live="polite"></div>
+  </section>
+
   <section class="panel">
     <h2>Consent &amp; data control</h2>
     <div id="consent"></div>
@@ -464,10 +478,7 @@ async function approve(id) { await api(`/api/approvals/${id}/approve`, "POST", {
 async function reject(id) { await api(`/api/approvals/${id}/reject`, "POST", { actor: currentActor }); await refresh(); }
 async function reset() { await api("/api/reset", "POST"); $("askResult").innerHTML = ""; $("accessResult").innerHTML = ""; await refresh(); }
 
-function quick(t) { $("askInput").value = t; ask(); }
-async function ask() {
-  const text = $("askInput").value.trim(); if (!text) return;
-  const r = await api("/api/ask", "POST", { actor: currentActor, text });
+function safetyHtml(r) {
   let h = `<div class="reply ${r.kind}"><b>${r.kind === "emergency" ? "⚠ EMERGENCY" : r.kind === "refusal" ? "CarePilot declines" : "CarePilot"}</b><div style="margin-top:6px">${esc(r.message)}</div>`;
   if (r.card) {
     h += '<table class="card" style="margin-top:10px">' +
@@ -478,8 +489,45 @@ async function ask() {
       `<tr><td>Code status</td><td>${esc(r.card.code_status)}</td></tr>` +
       `<tr><td>Pharmacy</td><td>${esc(r.card.pharmacy)}</td></tr></table>`;
   }
-  h += "</div>";
-  $("askResult").innerHTML = h;
+  return h + "</div>";
+}
+
+function quick(t) { $("askInput").value = t; ask(); }
+async function ask() {
+  const text = $("askInput").value.trim(); if (!text) return;
+  const r = await api("/api/ask", "POST", { actor: currentActor, text });
+  $("askResult").innerHTML = safetyHtml(r);
+  await refresh();
+}
+
+function agentQuick(t) { $("agentInput").value = t; runAgent(); }
+async function runAgent() {
+  const text = $("agentInput").value.trim(); if (!text) return;
+  $("agentResult").innerHTML = '<p class="empty">Planning…</p>'; say("Agent planning…");
+  let r;
+  try { r = await api("/api/agent" + qa(), "POST", { actor: currentActor, text }); }
+  catch (e) { $("agentResult").innerHTML = ""; alert(e.message); say("Agent error"); return; }
+
+  if (r.handled_by === "guardrails") {           // safety lane answered before planning
+    $("agentResult").innerHTML = safetyHtml(r);
+    say(r.kind === "emergency" ? "Emergency guidance shown" : "Request declined by safety rules");
+    await refresh(); return;
+  }
+  if (r.blocked) {
+    $("agentResult").innerHTML = `<div class="reply refusal">${esc(r.reason)}</div>`;
+    say(r.reason); await refresh(); return;
+  }
+
+  const live = !(r.plan_source || "").startsWith("fallback");
+  let h = `<div style="margin-top:10px"><span class="badge ${live ? "live" : "mock"}">${esc(r.plan_source || "")}</span></div>`;
+  (r.trace || []).forEach((s, i) => {
+    h += `<div class="item"><span class="pill">step ${i + 1}</span><b>${esc(s.action)}</b>` +
+         `<div class="quote">${esc(s.thought)}</div>` +
+         `<div class="muted" style="font-size:12px; word-break:break-word">→ ${esc(JSON.stringify(s.observation))}</div></div>`;
+  });
+  h += `<div class="reply granted" style="margin-top:10px"><b>Agent summary</b><div style="margin-top:6px">${esc(r.summary)}</div></div>`;
+  $("agentResult").innerHTML = h;
+  say("Agent finished: " + r.summary);
   await refresh();
 }
 

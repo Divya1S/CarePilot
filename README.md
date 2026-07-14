@@ -21,7 +21,8 @@ drafting the messages, booking what was missed and is radically careful with dat
 | **Scheduler** | The coverage scramble | Reads the calendar, plans who can cover an appointment around real constraints. |
 | **Briefer** | — | Specialty-tailored handoff one-pager for whoever covers. |
 | **Watcher** | The quiet catch | Correlates the symptom log + pharmacy refills → a Tier-2 flag, **proactively** (background job). |
-| **Orchestrator** | — | Plans the multi-step work, owns the human-in-the-loop checkpoints, writes the audit log. |
+| **Planner** | Any free-text job | **The agent core:** a ReAct-style LLM loop that picks tools step-by-step and returns a visible plan trace (`POST /api/agent`). |
+| **Orchestrator** | — | Owns the human-in-the-loop checkpoints, consent gating, and the audit log. |
 
 ```
               ┌──────────────────────── Orchestrator (Concierge) ────────────────────────┐
@@ -66,7 +67,7 @@ Full threat model, review findings, and honest limitations: **[SECURITY.md](SECU
 
 ```bash
 pip install -r backend/requirements.txt -r requirements-dev.txt
-pytest                                      # 91 tests, fully offline (no key)
+pytest                                      # 102 tests, fully offline (no key)
 ```
 Plus two **live** evals (run with a key): a 13-case Reconciler reliability corpus
 (`python -m reconciler.eval_corpus`) and an LLM-as-judge for draft quality
