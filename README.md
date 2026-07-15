@@ -17,7 +17,7 @@ drafting the messages, booking what was missed and is radically careful with dat
 | Agent | Journey | What it does |
 |---|---|---|
 | **Reconciler** | The conflict catch | Ingests after-visit PDFs → structured med/lab diff with **source citations**; catches what falls *between* two prescribers. |
-| **Comms-drafter** | — | Drafts pharmacy/PCP/family messages for approval. **Never sends** without a human tap. |
+| **Comms-drafter** | — | Drafts pharmacy/PCP/family messages for approval. **Never sends** without a human tap — and **learns your voice from the edits you make** before approving. |
 | **Scheduler** | The coverage scramble | Reads the calendar, plans who can cover an appointment around real constraints. |
 | **Briefer** | — | Specialty-tailored handoff one-pager for whoever covers. |
 | **Watcher** | The quiet catch | Correlates the symptom log + pharmacy refills → a Tier-2 flag, **proactively** (background job). |
@@ -67,7 +67,7 @@ Full threat model, review findings, and honest limitations: **[SECURITY.md](SECU
 
 ```bash
 pip install -r backend/requirements.txt -r requirements-dev.txt
-pytest                                      # 102 tests, fully offline (no key)
+pytest                                      # 109 tests, fully offline (no key)
 ```
 Plus two **live** evals (run with a key): a 13-case Reconciler reliability corpus
 (`python -m reconciler.eval_corpus`) and an LLM-as-judge for draft quality

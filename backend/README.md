@@ -19,6 +19,17 @@ consent-revoked blocks the planner, and a step cap + exact-repeat guard bound th
 loop. Without an LLM key, a clearly-labeled deterministic keyword router keeps the
 surface demoable.
 
+## Preference memory — the agent learns from your edits
+
+Every decision on a draft is a labeled example: approving unchanged confirms the
+style, **editing before approving is the richest signal**, rejecting is negative.
+[store.resolve](app/store.py) captures the (original → edited) pair; the drafters
+([comms.py](app/comms.py)) replay the most recent edit-pairs for that message kind
+into the drafting prompt — so drafts converge on the caregiver's voice with use.
+Transparent and private by the house rules: each capture is audited as
+`learned_from_edit`, examples are PII-redacted before reaching the LLM, and the
+memory appears in the data export and is cleared by erasure.
+
 ## What it does
 
 1. **Ingest** → the orchestrator runs the Reconciler, logs it, then the
@@ -73,6 +84,7 @@ uvicorn backend.app.main:app --reload
 | Method | Path | Purpose |
 |---|---|---|
 | POST | `/api/agent` | `{actor, text}` → **the agent**: guardrails screen → LLM planner selects tools step-by-step → returns the full plan trace + summary. Offline: deterministic keyword routing, labeled `fallback` |
+| GET | `/api/memory?actor=ID` | **what the agent has learned** from your decisions on drafts (edit counts + recent examples; admin) |
 | GET | `/api/state?actor=ID` | **role-filtered** state (reconciliation/plan/watch/approvals/outbox/audit) + roster + consent + notifications |
 | POST | `/api/reconcile` | Reconciler on the staged demo → draft → queue approval |
 | POST | `/api/reconcile/upload` | **upload a real PDF/MD/TXT** → live Reconciler → draft → queue (needs an LLM key) |
@@ -110,9 +122,11 @@ pip install -r backend/requirements.txt -r requirements-dev.txt
 pytest        # from the repo root
 ```
 
-102 tests covering: **the planner loop** (scripted multi-step plans, unknown-tool
-recovery, repeat guard, step cap, guardrail screening, consent block, offline
-fallback), the access gate + /health, source-quote-safe scanning, dose-change refusal / red-flag
+109 tests covering: **the planner loop** (scripted multi-step plans, unknown-tool
+recovery, repeat guard, step cap, guardrail screening, PII-redacted planning
+prompts, consent block, offline fallback), **preference memory** (edit capture,
+kind-scoped replay into drafter prompts with PII redaction, export/erasure),
+the access gate + /health, source-quote-safe scanning, dose-change refusal / red-flag
 escalation, role-filtered state (incl. briefing redaction for calendar-only
 roles), the deny→log→notify path, admin-gated agent actions, consent
 pause/restore, reconcile→approve→outbox→audit, the upload endpoint's

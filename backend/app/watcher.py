@@ -75,4 +75,4 @@ def draft_nurse_line(watch: dict) -> dict:
         f"Patient: {name}. Dated observations to relay (do not interpret or assign a cause):\n"
         f"{bullets}\n\nDraft the nurse-line message asking whether he should be seen and how soon."
     )
-    return comms.draft(NURSE_SYSTEM, prompt, template)
+    return comms.draft(NURSE_SYSTEM, prompt, template, kind="clinician_message")

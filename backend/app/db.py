@@ -44,6 +44,12 @@ CREATE TABLE IF NOT EXISTS calendar_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   summary TEXT, start TEXT, link TEXT, mock INTEGER, created_by TEXT, ts TEXT
 );
+CREATE TABLE IF NOT EXISTS draft_feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind TEXT, original TEXT, final TEXT,
+  outcome TEXT,  -- approved | approved_with_edits | rejected
+  actor TEXT, ts TEXT
+);
 """
 
 

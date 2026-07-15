@@ -140,6 +140,11 @@
   </section>
 
   <section class="panel">
+    <h2>Agent memory · learns from your edits</h2>
+    <div id="memory"><p class="empty">—</p></div>
+  </section>
+
+  <section class="panel">
     <h2>Coverage plan · Scheduler</h2>
     <div id="plan"><p class="empty">No coverage plan yet.</p></div>
   </section>
@@ -207,8 +212,33 @@ async function refresh() {
   renderPlan(s.plan);
   renderWatch(s.watch);
   renderCalendar(s.is_admin);
+  renderMemory(s.is_admin);
   renderOutbox(s.outbox);
   renderAudit(s.audit);
+}
+
+async function renderMemory(isAdmin) {
+  if (!isAdmin) { $("memory").innerHTML = '<p class="locked">🔒 Restricted for your role.</p>'; return; }
+  let m;
+  try { m = await api("/api/memory" + qa()); }
+  catch (e) { $("memory").innerHTML = '<p class="empty">—</p>'; return; }
+  const edits = m.counts["approved_with_edits"] || 0;
+  const clean = m.counts["approved"] || 0;
+  if (!edits && !clean) {
+    $("memory").innerHTML = '<p class="empty">Nothing learned yet — approve or edit a draft and the agent adapts to your voice.</p>';
+    return;
+  }
+  let h = `<div>Learned from <b>${edits}</b> edited draft${edits === 1 ? "" : "s"}` +
+          `<span class="muted"> · ${clean} approved as written</span></div>` +
+          `<div class="muted" style="font-size:12px; margin-top:4px">Your edits are replayed to the drafters so future drafts match your voice.</div>`;
+  if (m.examples.length) {
+    h += `<details style="margin-top:8px"><summary class="muted">What it learned</summary>` +
+      m.examples.map(ex => `<div class="item"><span class="pill">${esc(ex.kind)}</span>` +
+        `<div class="quote">it wrote: ${esc(ex.original.slice(0, 140))}…</div>` +
+        `<div style="font-size:13px">you wrote: ${esc(ex.final.slice(0, 140))}…</div></div>`).join("") +
+      `</details>`;
+  }
+  $("memory").innerHTML = h;
 }
 
 async function renderCalendar(isAdmin) {

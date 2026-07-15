@@ -16,6 +16,7 @@ from reconciler.redact import redact, rehydrate
 from reconciler.safety import scan_forbidden
 
 from . import care_context
+from .store import store
 
 DRAFTER_SYSTEM = """\
 You draft a short, plain message from a family caregiver to a pharmacy and PCP.
@@ -27,16 +28,45 @@ coordinator)".
 """
 
 
-def draft(system: str, prompt: str, template: str, redact_terms=None) -> dict:
+def _clip(s: str, n: int = 700) -> str:
+    return s if len(s) <= n else s[: n - 1] + "…"
+
+
+def _learned_block(kind: str | None) -> str:
+    """Preference memory: recent (draft → caregiver's edit) pairs for this kind.
+
+    Injected into the drafting prompt so future drafts converge on the
+    caregiver's voice and format. PII-safe: the block is appended BEFORE the
+    prompt-wide redaction in draft().
+    """
+    if not kind:
+        return ""
+    examples = store.feedback(kind=kind, outcome="approved_with_edits", limit=3)
+    if not examples:
+        return ""
+    parts = [
+        "\n\nLEARNED PREFERENCES — the caregiver edited these past drafts before "
+        "approving. Match the voice, tone, length, and format of THEIR versions:"
+    ]
+    for i, ex in enumerate(examples, 1):
+        parts.append(
+            f"\nExample {i} — draft you wrote:\n{_clip(ex['original'])}\n"
+            f"The caregiver rewrote it as:\n{_clip(ex['final'])}"
+        )
+    return "\n".join(parts)
+
+
+def draft(system: str, prompt: str, template: str, redact_terms=None, kind: str | None = None) -> dict:
     """Return {body, source}. Tries the LLM; falls back to `template` safely.
 
-    The prompt is PII-redacted before it reaches the LLM and the draft is
-    rehydrated afterward, so the provider never sees the patient's identity.
+    The prompt (including learned preference examples for `kind`) is PII-redacted
+    before it reaches the LLM and the draft is rehydrated afterward, so the
+    provider never sees the patient's identity.
     """
     if not llm.is_configured():
         return {"body": template, "source": "template"}
     terms = redact_terms if redact_terms is not None else care_context.REDACT_NAMES
-    redacted_prompt, mapping = redact(prompt, names=terms)
+    redacted_prompt, mapping = redact(prompt + _learned_block(kind), names=terms)
     try:
         text = rehydrate(llm.complete_text(system, redacted_prompt).strip(), mapping)
         # Defense in depth: a poisoned source could push a clinical claim, an
@@ -80,4 +110,4 @@ def draft_confirmation(recon: dict) -> dict:
         f"CHANGES:\n{_changes_summary(recon)}\n\n"
         "CONFLICTS:\n" + "\n".join(f"- {c['statement']}" for c in recon.get("conflicts", []))
     )
-    return draft(DRAFTER_SYSTEM, prompt, _template_draft(recon))
+    return draft(DRAFTER_SYSTEM, prompt, _template_draft(recon), kind="clinician_message")

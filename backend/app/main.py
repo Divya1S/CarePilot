@@ -254,6 +254,20 @@ def post_access(resource: str, req: ActorRequest) -> dict:
     raise HTTPException(403, f"Access to '{resource}' is not permitted for your role.")
 
 
+@app.get("/api/memory")
+def get_memory(actor: str = "maya") -> dict:
+    """What the agent has learned from the caregiver's decisions on drafts."""
+    _require_admin(actor)
+    fb = store.feedback()
+    counts: dict[str, int] = {}
+    for r in fb:
+        counts[r["outcome"]] = counts.get(r["outcome"], 0) + 1
+    return {
+        "counts": counts,
+        "examples": [r for r in fb if r["outcome"] == "approved_with_edits"][:5],
+    }
+
+
 @app.get("/api/data/export")
 def export_data(actor: str = "maya") -> dict:
     """Data-subject access request: everything the system holds about the recipient."""
@@ -270,6 +284,7 @@ def export_data(actor: str = "maya") -> dict:
         "watch": full["watch"],
         "approvals": full["approvals"],
         "outbox": full["outbox"],
+        "draft_feedback": store.feedback(),
         "audit_log": audit.entries(),
     }
 

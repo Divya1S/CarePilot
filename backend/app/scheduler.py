@@ -118,4 +118,4 @@ def draft_family_ask(plan: dict) -> dict:
         "Maya can't go (work review, can't move). Priya is local but her newborn naps 1-3 PM; "
         "she's free 3-5:30 PM. David is remote and can book a rideshare. Draft the ask to Priya."
     )
-    return comms.draft(FAMILY_SYSTEM, prompt, template)
+    return comms.draft(FAMILY_SYSTEM, prompt, template, kind="family_message")

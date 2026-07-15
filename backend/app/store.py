@@ -90,6 +90,29 @@ class Store:
             return None
         new_body = body if body is not None else row["body"]
         resolved_at = _now()
+
+        # Preference memory: every human decision on a draft is a labeled example.
+        # Edits are the richest signal — the drafters replay recent (original →
+        # edited) pairs so future drafts converge on the caregiver's voice.
+        if status == "rejected":
+            outcome = "rejected"
+        elif new_body.strip() != row["body"].strip():
+            outcome = "approved_with_edits"
+        else:
+            outcome = "approved"
+        db.execute(
+            "INSERT INTO draft_feedback(kind, original, final, outcome, actor, ts) VALUES(?, ?, ?, ?, ?, ?)",
+            (row["kind"], row["body"], new_body, outcome, actor, resolved_at),
+        )
+        if outcome == "approved_with_edits":
+            from . import audit  # deferred: keep store importable without the audit layer
+
+            audit.log(
+                actor,
+                "learned_from_edit",
+                detail=f"{row['kind']} draft was edited before approval — stored to shape future drafts",
+                resource=f"approval:{aid}",
+            )
         db.execute(
             "UPDATE approvals SET status=?, actor=?, resolved_at=?, body=? WHERE id=?",
             (status, actor, resolved_at, new_body, aid),
@@ -129,6 +152,23 @@ class Store:
         ]
 
     # ---- notifications ----
+    def feedback(self, kind: str | None = None, outcome: str | None = None, limit: int | None = None) -> list[dict]:
+        """Draft feedback, newest first (most recent preferences win)."""
+        q = "SELECT kind, original, final, outcome, actor, ts FROM draft_feedback"
+        conds, params = [], []
+        if kind:
+            conds.append("kind=?")
+            params.append(kind)
+        if outcome:
+            conds.append("outcome=?")
+            params.append(outcome)
+        if conds:
+            q += " WHERE " + " AND ".join(conds)
+        q += " ORDER BY id DESC"
+        if limit:
+            q += f" LIMIT {int(limit)}"
+        return [dict(r) for r in db.fetchall(q, tuple(params))]
+
     def add_calendar_event(self, summary: str, start: str, link: str, mock: bool, by: str) -> None:
         db.execute(
             "INSERT INTO calendar_events(summary, start, link, mock, created_by, ts) VALUES(?, ?, ?, ?, ?, ?)",
@@ -152,7 +192,7 @@ class Store:
 
     # ---- lifecycle ----
     def reset(self) -> None:
-        for t in ("approvals", "outbox", "notifications", "calendar_events", "kv"):
+        for t in ("approvals", "outbox", "notifications", "calendar_events", "draft_feedback", "kv"):
             db.execute(f"DELETE FROM {t}")
 
     def erase_subject_record(self) -> dict:
@@ -165,11 +205,12 @@ class Store:
             "approvals": len(self._approvals()),
             "outbox": len(self._outbox()),
             "calendar_events": len(self.calendar_events()),
+            "draft_feedback": len(self.feedback()),
             "reconciliation": 1 if self.reconciliation else 0,
             "plan": 1 if self.plan else 0,
             "watch": 1 if self.watch else 0,
         }
-        for t in ("approvals", "outbox", "notifications", "calendar_events", "kv"):
+        for t in ("approvals", "outbox", "notifications", "calendar_events", "draft_feedback", "kv"):
             db.execute(f"DELETE FROM {t}")
         return counts
 
