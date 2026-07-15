@@ -23,8 +23,9 @@ import json
 from pydantic import BaseModel, Field
 
 import llm
+from reconciler.redact import redact, rehydrate
 
-from . import agent_tools, audit
+from . import agent_tools, audit, care_context
 
 MAX_STEPS = 6
 
@@ -79,7 +80,15 @@ def run(request: str, actor: str = "maya") -> dict:
     trace: list[dict] = []
     for _ in range(MAX_STEPS):
         try:
-            step = llm.extract_structured(SYSTEM_PROMPT, _prompt(request, trace), PlannedAction)
+            # House rule: PII is redacted before ANY text reaches the LLM. The
+            # request and tool observations (which can carry the patient's name,
+            # e.g. approval titles) are tokenized; the model's user-facing text
+            # is rehydrated below so humans still see real names.
+            prompt, mapping = redact(_prompt(request, trace), names=care_context.REDACT_NAMES)
+            step = llm.extract_structured(SYSTEM_PROMPT, prompt, PlannedAction)
+            if mapping:
+                step.thought = rehydrate(step.thought, mapping)
+                step.summary = rehydrate(step.summary, mapping)
         except Exception as exc:  # noqa: BLE001 - return the partial trace, don't 500
             audit.log("planner", "plan_failed", detail=str(exc)[:200])
             return {

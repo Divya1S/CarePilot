@@ -109,6 +109,42 @@ def test_agent_respects_consent(client):
     assert r["handled_by"] == "consent" and r["blocked"] is True
 
 
+def test_planner_redacts_pii_and_rehydrates_output(client, monkeypatch):
+    """House rule: no PII reaches the LLM — including via tool observations."""
+    import llm
+    from backend.app import care_context
+
+    name = care_context.RECIPIENT_NAME  # "Robert Chen"
+    client.post("/api/reconcile?actor=maya")  # pending approval title now contains the name
+
+    prompts = []
+    steps = iter([
+        PlannedAction(thought=f"Check on {name}'s situation", action="get_care_state"),
+        # the model answers in tokens; rehydration must restore the real name for humans
+        PlannedAction(thought="done", action="finish", summary="All set for [NAME_1]."),
+    ])
+
+    def fake_extract(system, user, schema):
+        prompts.append(user)
+        return next(steps)
+
+    monkeypatch.setattr(llm, "is_configured", lambda: True)
+    monkeypatch.setattr(llm, "describe", lambda: "scripted-test-model")
+    monkeypatch.setattr(llm, "extract_structured", fake_extract)
+
+    body = client.post("/api/agent", json={"actor": "maya",
+                                           "text": f"{name} saw the neurologist — handle his paperwork"}).json()
+
+    # The name never reached the LLM — not in the request, not via observations.
+    for p in prompts:
+        assert name not in p, "PII leaked into a planning prompt"
+    assert "[NAME_1]" in prompts[0]
+    # Observation from get_care_state (contains the approval title) was in prompt 2, redacted.
+    assert "pending_approvals" in prompts[1] and name not in prompts[1]
+    # The human-facing summary was rehydrated back to the real name.
+    assert name in body["summary"]
+
+
 def test_agent_offline_fallback_routes_coverage(client):
     # no LLM key in tests → deterministic keyword routing, clearly labeled
     body = client.post("/api/agent", json={
