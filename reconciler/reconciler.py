@@ -108,7 +108,7 @@ def reconcile(
     med_list = Path(med_list_path).read_text(encoding="utf-8")
     prompt = _build_prompt([Path(p) for p in document_paths], med_list)
     redacted_prompt, mapping = redact(prompt, names=redact_terms)
-    result = llm.extract_structured(SYSTEM_PROMPT, redacted_prompt, ReconciliationResult)
+    result = llm.extract_structured(SYSTEM_PROMPT, redacted_prompt, ReconciliationResult, purpose="reconcile")
     if mapping:
         result = ReconciliationResult.model_validate(rehydrate_obj(result.model_dump(), mapping))
     if enforce_safety:

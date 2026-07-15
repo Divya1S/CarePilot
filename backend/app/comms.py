@@ -68,7 +68,10 @@ def draft(system: str, prompt: str, template: str, redact_terms=None, kind: str 
     terms = redact_terms if redact_terms is not None else care_context.REDACT_NAMES
     redacted_prompt, mapping = redact(prompt + _learned_block(kind), names=terms)
     try:
-        text = rehydrate(llm.complete_text(system, redacted_prompt).strip(), mapping)
+        text = rehydrate(
+            llm.complete_text(system, redacted_prompt, purpose=f"draft:{kind or 'generic'}").strip(),
+            mapping,
+        )
         # Defense in depth: a poisoned source could push a clinical claim, an
         # injected instruction, or an exfiltration target into the draft.
         problems = scan_forbidden(text) + scan_injection(text) + scan_exfiltration(text)
@@ -76,6 +79,9 @@ def draft(system: str, prompt: str, template: str, redact_terms=None, kind: str 
             return {"body": template, "source": "template (draft failed safety/injection check)"}
         return {"body": text, "source": f"llm ({llm.describe()})"}
     except Exception as exc:  # noqa: BLE001 - never let the drafter break the demo
+        import logging
+
+        logging.getLogger("carepilot.app").warning("drafter LLM call failed, using template: %s", exc)
         return {"body": template, "source": f"template (llm error: {exc})"}
 
 

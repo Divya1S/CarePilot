@@ -46,7 +46,7 @@ def test_drafter_replays_learned_edits_pii_redacted(client, monkeypatch):
     monkeypatch.setattr(llm, "is_configured", lambda: True)
     monkeypatch.setattr(llm, "describe", lambda: "scripted-test-model")
 
-    def fake_complete(system, user):
+    def fake_complete(system, user, **kw):
         captured["user"] = user
         return "Please confirm the plan. Thanks, Maya"
 

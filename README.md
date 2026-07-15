@@ -67,7 +67,7 @@ Full threat model, review findings, and honest limitations: **[SECURITY.md](SECU
 
 ```bash
 pip install -r backend/requirements.txt -r requirements-dev.txt
-pytest                                      # 109 tests, fully offline (no key)
+pytest                                      # 115 tests, fully offline (no key)
 ```
 Plus two **live** evals (run with a key): a 13-case Reconciler reliability corpus
 (`python -m reconciler.eval_corpus`) and an LLM-as-judge for draft quality

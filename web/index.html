@@ -177,6 +177,11 @@
     <div id="outbox"><p class="empty">Nothing sent yet.</p></div>
   </section>
 
+  <section class="panel">
+    <h2>Telemetry · LLM calls</h2>
+    <div id="telemetry"><p class="empty">—</p></div>
+  </section>
+
   <section class="panel full">
     <h2>Audit log · append-only</h2>
     <div id="audit"><p class="empty">Empty.</p></div>
@@ -213,8 +218,39 @@ async function refresh() {
   renderWatch(s.watch);
   renderCalendar(s.is_admin);
   renderMemory(s.is_admin);
+  renderTelemetry(s.is_admin);
   renderOutbox(s.outbox);
   renderAudit(s.audit);
+}
+
+async function renderTelemetry(isAdmin) {
+  if (!isAdmin) { $("telemetry").innerHTML = '<p class="locked">🔒 Restricted for your role.</p>'; return; }
+  let t;
+  try { t = await api("/api/telemetry" + qa()); }
+  catch (e) { $("telemetry").innerHTML = '<p class="empty">—</p>'; return; }
+  const tot = t.totals;
+  if (!tot.calls) {
+    $("telemetry").innerHTML = '<p class="empty">No LLM calls yet — telemetry appears once the agent runs with a key.</p>';
+    return;
+  }
+  let h = `<div><b>${tot.calls}</b> call${tot.calls === 1 ? "" : "s"} · ` +
+          `${tot.tokens_in.toLocaleString()} in / ${tot.tokens_out.toLocaleString()} out tokens · ` +
+          `avg ${tot.avg_latency_ms} ms` +
+          (tot.errors ? ` · <span style="color:var(--danger)">${tot.errors} error${tot.errors === 1 ? "" : "s"}</span>` : "") + `</div>`;
+  if (t.by_purpose.length) {
+    h += "<table style='margin-top:8px'>" + t.by_purpose.map(p =>
+      `<tr><td><b>${esc(p.purpose)}</b></td><td>${p.calls} calls</td>` +
+      `<td class="muted">${p.tokens_in.toLocaleString()} / ${p.tokens_out.toLocaleString()} tok</td></tr>`).join("") + "</table>";
+  }
+  if (t.recent.length) {
+    h += `<details style="margin-top:8px"><summary class="muted">Recent calls</summary><table>` +
+      t.recent.map(r =>
+        `<tr><td class="muted">${esc((r.ts || "").slice(11, 19))}</td><td><b>${esc(r.purpose)}</b></td>` +
+        `<td>${r.latency_ms} ms</td><td>${r.attempts > 1 ? r.attempts + " tries" : ""}</td>` +
+        `<td>${r.ok ? "✓" : `<span style="color:var(--danger)">✕ ${esc((r.error || "").slice(0, 60))}</span>`}</td></tr>`).join("") +
+      `</table></details>`;
+  }
+  $("telemetry").innerHTML = h;
 }
 
 async function renderMemory(isAdmin) {

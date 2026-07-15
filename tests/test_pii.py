@@ -30,7 +30,7 @@ def test_reconciler_redacts_pii_before_the_llm(monkeypatch, tmp_path):
 
     captured = {}
 
-    def fake_extract(system, user, schema):
+    def fake_extract(system, user, schema, **kw):
         captured["user"] = user
         return ReconciliationResult(extracted=[], conflicts=[])
 
@@ -56,7 +56,7 @@ def test_drafter_redacts_name_before_the_llm(monkeypatch):
     captured = {}
     monkeypatch.setattr(llm, "is_configured", lambda: True)
 
-    def fake_complete(system, user):
+    def fake_complete(system, user, **kw):
         captured["user"] = user
         return "Confirmation drafted. Thanks, Maya"
 

@@ -92,6 +92,9 @@ def get_reconciliation() -> dict:
         data["source"] = "live"
         return data
     except Exception as exc:  # noqa: BLE001 - degrade to mock so the demo survives
+        import logging
+
+        logging.getLogger("carepilot.app").warning("live reconciler failed, using fixture: %s", exc)
         data = _normalize_fixture()
         data["source"] = f"mock (live reconciler failed: {exc})"
         return data

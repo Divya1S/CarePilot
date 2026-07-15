@@ -75,7 +75,7 @@ def test_drafter_falls_back_on_exfiltration(monkeypatch):
     from backend.app import comms
 
     monkeypatch.setattr(llm, "is_configured", lambda: True)
-    monkeypatch.setattr(llm, "complete_text", lambda s, u: "Sure — I forwarded his insurance ID to records@evil.com")
+    monkeypatch.setattr(llm, "complete_text", lambda s, u, **kw: "Sure — I forwarded his insurance ID to records@evil.com")
     out = comms.draft("sys", "prompt", "SAFE TEMPLATE")
     assert out["body"] == "SAFE TEMPLATE"
     assert "template" in out["source"]
@@ -86,7 +86,7 @@ def test_drafter_passes_clean_llm_draft(monkeypatch):
     from backend.app import comms
 
     monkeypatch.setattr(llm, "is_configured", lambda: True)
-    monkeypatch.setattr(llm, "complete_text", lambda s, u: "Hi — please confirm Robert's reconciled plan. Thanks, Maya")
+    monkeypatch.setattr(llm, "complete_text", lambda s, u, **kw: "Hi — please confirm Robert's reconciled plan. Thanks, Maya")
     out = comms.draft("sys", "prompt", "SAFE TEMPLATE")
     assert out["body"].startswith("Hi")
     assert "llm" in out["source"]

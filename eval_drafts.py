@@ -61,7 +61,7 @@ def judge_draft(draft: str, summary: str) -> DraftJudgment:
         f"Evaluate this draft message.\n\nDRAFT:\n{draft}\n\n"
         f"IT MUST FAITHFULLY REFLECT (and ask the recipient to confirm or act on):\n{summary}"
     )
-    return llm.extract_structured(JUDGE_SYSTEM, user, DraftJudgment)
+    return llm.extract_structured(JUDGE_SYSTEM, user, DraftJudgment, purpose="judge")
 
 
 def run() -> int:

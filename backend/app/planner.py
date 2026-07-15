@@ -85,7 +85,7 @@ def run(request: str, actor: str = "maya") -> dict:
             # e.g. approval titles) are tokenized; the model's user-facing text
             # is rehydrated below so humans still see real names.
             prompt, mapping = redact(_prompt(request, trace), names=care_context.REDACT_NAMES)
-            step = llm.extract_structured(SYSTEM_PROMPT, prompt, PlannedAction)
+            step = llm.extract_structured(SYSTEM_PROMPT, prompt, PlannedAction, purpose="plan")
             if mapping:
                 step.thought = rehydrate(step.thought, mapping)
                 step.summary = rehydrate(step.summary, mapping)

@@ -19,6 +19,17 @@ consent-revoked blocks the planner, and a step cap + exact-repeat guard bound th
 loop. Without an LLM key, a clearly-labeled deterministic keyword router keeps the
 surface demoable.
 
+## Observability
+
+Every LLM call is timed, token-counted, and labeled with its purpose
+(`reconcile`, `plan`, `draft:<kind>`, `judge`), logged via the `carepilot.llm`
+logger, and persisted to a **metadata-only ledger** (never prompt/response text,
+so it stays PII-free by construction) — see `GET /api/telemetry` and the
+Telemetry panel. Retries are counted per call, transport errors are recorded and
+visible, and previously-silent fallbacks (drafter → template, live reconciler →
+fixture, background scan failures) now emit `carepilot.app` warnings without
+changing their fail-safe behavior.
+
 ## Preference memory — the agent learns from your edits
 
 Every decision on a draft is a labeled example: approving unchanged confirms the
@@ -85,6 +96,7 @@ uvicorn backend.app.main:app --reload
 |---|---|---|
 | POST | `/api/agent` | `{actor, text}` → **the agent**: guardrails screen → LLM planner selects tools step-by-step → returns the full plan trace + summary. Offline: deterministic keyword routing, labeled `fallback` |
 | GET | `/api/memory?actor=ID` | **what the agent has learned** from your decisions on drafts (edit counts + recent examples; admin) |
+| GET | `/api/telemetry?actor=ID` | **LLM call ledger**: totals, per-purpose token/latency breakdown, recent calls incl. errors (admin) |
 | GET | `/api/state?actor=ID` | **role-filtered** state (reconciliation/plan/watch/approvals/outbox/audit) + roster + consent + notifications |
 | POST | `/api/reconcile` | Reconciler on the staged demo → draft → queue approval |
 | POST | `/api/reconcile/upload` | **upload a real PDF/MD/TXT** → live Reconciler → draft → queue (needs an LLM key) |
@@ -122,7 +134,8 @@ pip install -r backend/requirements.txt -r requirements-dev.txt
 pytest        # from the repo root
 ```
 
-109 tests covering: **the planner loop** (scripted multi-step plans, unknown-tool
+115 tests covering: **the LLM ledger** (token/retry/error accounting via a fake
+provider, endpoint gating),  **the planner loop** (scripted multi-step plans, unknown-tool
 recovery, repeat guard, step cap, guardrail screening, PII-redacted planning
 prompts, consent block, offline fallback), **preference memory** (edit capture,
 kind-scoped replay into drafter prompts with PII redaction, export/erasure),

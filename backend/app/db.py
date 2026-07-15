@@ -50,6 +50,13 @@ CREATE TABLE IF NOT EXISTS draft_feedback (
   outcome TEXT,  -- approved | approved_with_edits | rejected
   actor TEXT, ts TEXT
 );
+CREATE TABLE IF NOT EXISTS llm_calls (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ts TEXT, purpose TEXT, provider TEXT, model TEXT,
+  latency_ms INTEGER, attempts INTEGER,
+  prompt_tokens INTEGER, completion_tokens INTEGER,
+  ok INTEGER, error TEXT
+);
 """
 
 

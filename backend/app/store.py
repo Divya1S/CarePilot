@@ -169,6 +169,41 @@ class Store:
             q += f" LIMIT {int(limit)}"
         return [dict(r) for r in db.fetchall(q, tuple(params))]
 
+    # ---- LLM call ledger (metadata only — never prompt/response text) ----
+    def record_llm_call(self, rec: dict) -> None:
+        db.execute(
+            "INSERT INTO llm_calls(ts, purpose, provider, model, latency_ms, attempts, "
+            "prompt_tokens, completion_tokens, ok, error) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                _now(), rec.get("purpose", ""), rec.get("provider", ""), rec.get("model", ""),
+                int(rec.get("latency_ms", 0)), int(rec.get("attempts", 1)),
+                int(rec.get("prompt_tokens", 0)), int(rec.get("completion_tokens", 0)),
+                1 if rec.get("ok") else 0, rec.get("error", ""),
+            ),
+        )
+
+    def llm_stats(self) -> dict:
+        totals = db.fetchone(
+            "SELECT COUNT(*) AS calls, COALESCE(SUM(prompt_tokens),0) AS tokens_in, "
+            "COALESCE(SUM(completion_tokens),0) AS tokens_out, "
+            "COALESCE(SUM(1-ok),0) AS errors, COALESCE(AVG(latency_ms),0) AS avg_latency_ms "
+            "FROM llm_calls"
+        )
+        by_purpose = db.fetchall(
+            "SELECT purpose, COUNT(*) AS calls, COALESCE(SUM(prompt_tokens),0) AS tokens_in, "
+            "COALESCE(SUM(completion_tokens),0) AS tokens_out FROM llm_calls "
+            "GROUP BY purpose ORDER BY calls DESC"
+        )
+        recent = db.fetchall(
+            "SELECT ts, purpose, model, latency_ms, attempts, prompt_tokens, "
+            "completion_tokens, ok, error FROM llm_calls ORDER BY id DESC LIMIT 8"
+        )
+        return {
+            "totals": {**dict(totals), "avg_latency_ms": int(totals["avg_latency_ms"])},
+            "by_purpose": [dict(r) for r in by_purpose],
+            "recent": [dict(r) for r in recent],
+        }
+
     def add_calendar_event(self, summary: str, start: str, link: str, mock: bool, by: str) -> None:
         db.execute(
             "INSERT INTO calendar_events(summary, start, link, mock, created_by, ts) VALUES(?, ?, ?, ?, ?, ?)",
@@ -192,7 +227,9 @@ class Store:
 
     # ---- lifecycle ----
     def reset(self) -> None:
-        for t in ("approvals", "outbox", "notifications", "calendar_events", "draft_feedback", "kv"):
+        # llm_calls is included for clean demos; it holds no personal data (metadata
+        # only), which is also why erase_subject_record deliberately leaves it alone.
+        for t in ("approvals", "outbox", "notifications", "calendar_events", "draft_feedback", "llm_calls", "kv"):
             db.execute(f"DELETE FROM {t}")
 
     def erase_subject_record(self) -> dict:

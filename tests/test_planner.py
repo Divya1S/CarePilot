@@ -11,7 +11,7 @@ def _script(monkeypatch, steps):
     it = iter(steps)
     monkeypatch.setattr(llm, "is_configured", lambda: True)
     monkeypatch.setattr(llm, "describe", lambda: "scripted-test-model")
-    monkeypatch.setattr(llm, "extract_structured", lambda system, user, schema: next(it))
+    monkeypatch.setattr(llm, "extract_structured", lambda system, user, schema, **kw: next(it))
 
 
 # ---- registry ----
@@ -124,7 +124,7 @@ def test_planner_redacts_pii_and_rehydrates_output(client, monkeypatch):
         PlannedAction(thought="done", action="finish", summary="All set for [NAME_1]."),
     ])
 
-    def fake_extract(system, user, schema):
+    def fake_extract(system, user, schema, **kw):
         prompts.append(user)
         return next(steps)
 

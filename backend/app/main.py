@@ -11,6 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import base64
+import logging
 import os
 import secrets
 import shutil
@@ -25,6 +26,14 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 
 from . import audit, care_context, gcal, guardrails, orchestrator, permissions, planner
+
+logger = logging.getLogger("carepilot.app")
+if not logger.handlers:
+    _h = logging.StreamHandler()
+    _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+    logger.addHandler(_h)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 from .models import ActorRequest, ApproveRequest, AskRequest, ConsentRequest, RejectRequest
 from .store import store
 
@@ -32,13 +41,17 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 INDEX_HTML = REPO_ROOT / "web" / "index.html"
 
 
+# Persist the per-call LLM ledger (metadata only) — see llm.py and /api/telemetry.
+llm.set_recorder(store.record_llm_call)
+
+
 def _background_watch_loop(interval: int) -> None:
     time.sleep(min(10, interval))  # an early first scan so the demo fires soon after start
     while True:
         try:
             orchestrator.run_proactive_scan()
-        except Exception:  # noqa: BLE001 - never let the background job crash the server
-            pass
+        except Exception as exc:  # noqa: BLE001 - never crash the server, but never hide it either
+            logger.warning("proactive scan failed: %s", exc)
         time.sleep(interval)
 
 
@@ -252,6 +265,13 @@ def post_access(resource: str, req: ActorRequest) -> dict:
     audit.log(req.actor, "access_DENIED", detail=f"attempted to open {resource}", resource=resource)
     store.notify("maya", f"{care_context.name_of(req.actor)} attempted to open '{resource}' and was blocked.")
     raise HTTPException(403, f"Access to '{resource}' is not permitted for your role.")
+
+
+@app.get("/api/telemetry")
+def get_telemetry(actor: str = "maya") -> dict:
+    """LLM call ledger: totals, per-purpose breakdown, recent calls. Metadata only."""
+    _require_admin(actor)
+    return store.llm_stats()
 
 
 @app.get("/api/memory")
